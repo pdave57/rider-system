@@ -1,0 +1,12 @@
+go 1.22
+
+use (
+	./shared
+	./services/api-gateway
+	./services/auth-service
+	./services/order-service
+	./services/dispatch-service
+	./services/payment-service
+	./services/realtime-service
+	./services/rider-service
+)
