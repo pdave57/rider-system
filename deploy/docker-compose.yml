@@ -47,7 +47,7 @@ services:
     container_name: rydex-gateway
     env_file: ./env/.env
     environment:
-      - GATEWAY_PORT=8080
+      - GATEWAY_PORT=8001
       - AUTH_SERVICE_URL=http://auth-service:8081
       - ORDER_SERVICE_URL=http://order-service:8082
       - DISPATCH_SERVICE_URL=http://dispatch-service:8083
@@ -55,7 +55,7 @@ services:
       - REALTIME_SERVICE_URL=http://realtime-service:8085
       - RIDER_SERVICE_URL=http://rider-service:8086
     ports:
-      - "8080:8080"
+      - "8001:8001"
     depends_on:
       - auth-service
       - order-service
@@ -67,7 +67,7 @@ services:
   auth-service:
     build:
       context: ..
-      dockerfile: services/auth-service/Dockerfile
+      dockerfile: services/auth-service/dockerfile
     container_name: rydex-auth
     env_file: ./env/.env
     environment:
@@ -80,7 +80,7 @@ services:
   order-service:
     build:
       context: ..
-      dockerfile: services/order-service/Dockerfile
+      dockerfile: services/order-service/dockerfile
     container_name: rydex-order
     env_file: ./env/.env
     environment:
@@ -93,7 +93,7 @@ services:
   dispatch-service:
     build:
       context: ..
-      dockerfile: services/dispatch-service/Dockerfile
+      dockerfile: services/dispatch-service/dockerfile
     container_name: rydex-dispatch
     env_file: ./env/.env
     environment:
@@ -108,7 +108,7 @@ services:
   payment-service:
     build:
       context: ..
-      dockerfile: services/payment-service/Dockerfile
+      dockerfile: services/payment-service/dockerfile
     container_name: rydex-payment
     env_file: ./env/.env
     environment:
@@ -121,7 +121,7 @@ services:
   realtime-service:
     build:
       context: ..
-      dockerfile: services/realtime-service/Dockerfile
+      dockerfile: services/realtime-service/dockerfile
     container_name: rydex-realtime
     env_file: ./env/.env
     environment:
@@ -133,7 +133,7 @@ services:
   rider-service:
     build:
       context: ..
-      dockerfile: services/rider-service/Dockerfile
+      dockerfile: services/rider-service/dockerfile
     container_name: rydex-rider
     env_file: ./env/.env
     environment:
