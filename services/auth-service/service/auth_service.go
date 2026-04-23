@@ -9,8 +9,10 @@ import (
 	"gorm.io/gorm"
 )
 
+//initiate dependency injection
 type AuthService struct{ db *gorm.DB }
 
+//dependency injection
 func NewAuthService(db *gorm.DB) *AuthService { return &AuthService{db: db} }
 
 func (s *AuthService) Register(req dto.RegisterRequest) (*dto.AuthResponse, error) {
@@ -28,8 +30,14 @@ func (s *AuthService) Register(req dto.RegisterRequest) (*dto.AuthResponse, erro
 	if err != nil {
 		return nil, errors.New("failed to hash password")
 	}
-	user := &models.User{FullName: req.FullName, Email: req.Email,
-		Phone: req.Phone, Password: string(hashed), Role: req.Role, IsActive: true}
+	user := &models.User{
+		FullName: req.FullName, 
+		Email: req.Email,
+		Phone: req.Phone, 
+		Password: string(hashed), 
+		Role: req.Role, 
+		IsActive: true,
+	}
 	switch req.Role {
 	case models.RoleRider:
 		user.RiderProfile = &models.RiderProfile{VehicleType: req.VehicleType, VehiclePlate: req.VehiclePlate}

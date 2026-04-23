@@ -20,12 +20,19 @@ func (s *OrderService) Create(clientID uint, req dto.CreateOrderRequest) (*dto.O
 	dist := utils.HaversineKm(req.PickupLatitude, req.PickupLongitude, req.DropoffLatitude, req.DropoffLongitude)
 	fee := utils.DeliveryFee(dist, req.WeightKg)
 	order := &models.Order{
-		TrackingCode: utils.GenerateTrackingCode(), ClientID: clientID,
-		Status: models.OrderPending, PickupAddress: req.PickupAddress,
-		PickupLatitude: req.PickupLatitude, PickupLongitude: req.PickupLongitude,
-		DropoffAddress: req.DropoffAddress, DropoffLatitude: req.DropoffLatitude,
-		DropoffLongitude: req.DropoffLongitude, PackageDesc: req.PackageDesc,
-		WeightKg: req.WeightKg, DeliveryFee: fee, Notes: req.Notes,
+		TrackingCode: utils.GenerateTrackingCode(), 
+		ClientID: clientID,
+		Status: models.OrderPending, 
+		PickupAddress: req.PickupAddress,
+		PickupLatitude: req.PickupLatitude, 
+		PickupLongitude: req.PickupLongitude,
+		DropoffAddress: req.DropoffAddress, 
+		DropoffLatitude: req.DropoffLatitude,
+		DropoffLongitude: req.DropoffLongitude, 
+		PackageDesc: req.PackageDesc,
+		WeightKg: req.WeightKg, 
+		DeliveryFee: fee, 
+		Notes: req.Notes,
 	}
 	if err := s.db.Create(order).Error; err != nil { return nil, err }
 	resp := dto.ToOrderResponse(order)

@@ -18,7 +18,7 @@ func generateToken(userID uint, email string, role models.Role) (string, error) 
 	claims := middleware.Claims{
 		UserID: userID, Email: email, Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(48 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Subject:   email,
 		},

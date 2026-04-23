@@ -50,7 +50,7 @@ func main() {
 	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { utils.NotFound(w, "route not found") })
 	handler := middleware.Chain(mux, middleware.CORS, middleware.Logger)
-	port := utils.GetEnv("GATEWAY_PORT", "8080")
+	port := utils.GetEnv("GATEWAY_PORT", "8001")
 	log.Printf("[api-gateway] :%s", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), handler); err != nil {
 		log.Fatal(err)

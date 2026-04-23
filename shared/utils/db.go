@@ -16,8 +16,8 @@ func NewPostgres(dbName string) *gorm.DB {
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		GetEnv("DB_HOST", "localhost"),
 		GetEnv("DB_PORT", "5432"),
-		GetEnv("DB_USER", "postgres"),
-		GetEnv("DB_PASSWORD", ""),
+		GetEnv("DB_USER", "admin"),
+		GetEnv("DB_PASSWORD", "letmein"),
 		dbName,
 		GetEnv("DB_SSLMODE", "disable"),
 	)
@@ -36,7 +36,7 @@ func NewPostgres(dbName string) *gorm.DB {
 func NewRedis() *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", GetEnv("REDIS_HOST", "localhost"), GetEnv("REDIS_PORT", "6379")),
-		Password: GetEnv("REDIS_PASSWORD", ""),
+		Password: GetEnv("REDIS_PASSWORD", "f4WGv1vuqrFUVL0Pd3bDuebQIHGGZ45E"),
 	})
 }
 

@@ -12,8 +12,10 @@ import (
 	"github.com/rydex/shared/utils"
 )
 
+//initiate dependency injection
 type OrderHandler struct{ svc *service.OrderService }
 
+//dependency injection
 func NewOrderHandler(svc *service.OrderService) *OrderHandler { return &OrderHandler{svc: svc} }
 
 func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
