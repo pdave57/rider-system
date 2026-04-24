@@ -53,6 +53,7 @@ type User struct {
 	Role      Role           `gorm:"type:varchar(20);not null;default:'client'" json:"role"`
 	IsActive  bool           `gorm:"default:true" json:"is_active"`
 	AvatarURL string         `gorm:"type:varchar(255)" json:"avatar_url,omitempty"`
+	AvatarPublicID string    `gorm:"type:varchar(255)" json:"avatar_public_id,omitempty"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
@@ -104,6 +105,7 @@ type Order struct {
 	WeightKg         float64        `gorm:"type:decimal(6,2)" json:"weight_kg"`
 	DeliveryFee      float64        `gorm:"type:decimal(10,2)" json:"delivery_fee"`
 	Notes            string         `gorm:"type:text" json:"notes,omitempty"`
+	Items            []OrderItem    `gorm:"foreignKey:OrderID" json:"items,omitempty"`
 	PickedUpAt       *time.Time     `json:"picked_up_at,omitempty"`
 	DeliveredAt      *time.Time     `json:"delivered_at,omitempty"`
 	CancelledAt      *time.Time     `json:"cancelled_at,omitempty"`
@@ -114,6 +116,15 @@ type Order struct {
 	Client  *User    `gorm:"foreignKey:ClientID" json:"client,omitempty"`
 	Rider   *User    `gorm:"foreignKey:RiderID" json:"rider,omitempty"`
 	Payment *Payment `gorm:"foreignKey:OrderID" json:"payment,omitempty"`
+}
+type OrderItem struct {
+	ID          uint `gorm:"primaryKey;autoIncrement" json:"id"`
+	OrderID     uint `gorm:"not null" json:"order_id"`
+	Name        string    `gorm:"not null" json:"name"`
+	Description string    `json:"description,omitempty"`
+	Quantity    int       `gorm:"default:1" json:"quantity"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type Dispatch struct {

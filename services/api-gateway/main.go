@@ -23,6 +23,7 @@ var routes = []route{
 	{"/api/realtime", "REALTIME_SERVICE_URL"},
 	{"/ws", "REALTIME_SERVICE_URL"},
 	{"/api/riders", "RIDER_SERVICE_URL"},
+	{"/api/upload", "UPLOAD_SERVICE_URL"},
 }
 
 func main() {

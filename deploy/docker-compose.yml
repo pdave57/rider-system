@@ -6,11 +6,12 @@ services:
     container_name: rydex-postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: letmein
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ../infra/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -54,6 +55,7 @@ services:
       - PAYMENT_SERVICE_URL=http://payment-service:8084
       - REALTIME_SERVICE_URL=http://realtime-service:8085
       - RIDER_SERVICE_URL=http://rider-service:8086
+      - UPLOAD_SERVICE_URL=http://upload-service:8087
     ports:
       - "8001:8001"
     depends_on:

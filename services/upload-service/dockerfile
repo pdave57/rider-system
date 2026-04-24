@@ -1,0 +1,19 @@
+FROM golang:alpine
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /app
+
+COPY shared/ shared/
+COPY services/upload-service/ services/upload-service/
+
+WORKDIR /app/services/upload-service
+ENV GOWORK=off
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+
+RUN go mod download
+RUN go build -o /service .
+
+EXPOSE 8087
+CMD ["/service"]
