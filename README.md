@@ -1,4 +1,4 @@
-# Rydex — Delivery & Logistics Microservices Platform
+# Runns — Delivery & Logistics Microservices Platform
 
 Production-grade microservices in Go: 7 independent services, PostgreSQL per-service, Redis geo-dispatch, WebSocket GPS streaming, JWT auth.
 
@@ -67,7 +67,7 @@ wscat -c "ws://localhost/ws" --header "Authorization: Bearer <rider_token>"
 ## Structure
 
 ```
-rydex-system/
+rider-system/
 ├── go.work
 ├── shared/                  # Models, middleware, utils (imported by all services)
 ├── services/
