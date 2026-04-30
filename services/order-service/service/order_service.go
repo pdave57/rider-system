@@ -1,17 +1,24 @@
 package service
 
 import (
+	"context"
 	"errors"
 
 	"github.com/rydex/order-service/dto"
 	"github.com/rydex/shared/models"
+	"github.com/rydex/shared/rabbitmq"
 	"github.com/rydex/shared/utils"
 	"gorm.io/gorm"
 )
 
-type OrderService struct{ db *gorm.DB }
+type OrderService struct {
+	db  *gorm.DB
+	rmq *rabbitmq.Client
+}
 
-func NewOrderService(db *gorm.DB) *OrderService { return &OrderService{db: db} }
+func NewOrderService(db *gorm.DB, rmq *rabbitmq.Client) *OrderService {
+	return &OrderService{db: db, rmq: rmq}
+}
 
 func (s *OrderService) Create(clientID uint, req dto.CreateOrderRequest) (*dto.OrderResponse, error) {
 	if req.PickupAddress == "" || req.DropoffAddress == "" {
@@ -36,6 +43,9 @@ func (s *OrderService) Create(clientID uint, req dto.CreateOrderRequest) (*dto.O
 	}
 	if err := s.db.Create(order).Error; err != nil { return nil, err }
 	resp := dto.ToOrderResponse(order)
+	if s.rmq != nil {
+		_ = s.rmq.PublishJSON(context.Background(), "rydex_events", "order.created", resp)
+	}
 	return &resp, nil
 }
 
@@ -80,6 +90,9 @@ func (s *OrderService) UpdateStatus(orderID uint, req dto.UpdateStatusRequest) (
 	o.Status = req.Status
 	s.db.Save(&o)
 	resp := dto.ToOrderResponse(&o)
+	if s.rmq != nil {
+		_ = s.rmq.PublishJSON(context.Background(), "rydex_events", "order.status_updated", resp)
+	}
 	return &resp, nil
 }
 

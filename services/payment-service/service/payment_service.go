@@ -1,18 +1,25 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"time"
 
 	"github.com/rydex/payment-service/dto"
 	"github.com/rydex/shared/models"
+	"github.com/rydex/shared/rabbitmq"
 	"github.com/rydex/shared/utils"
 	"gorm.io/gorm"
 )
 
-type PaymentService struct{ db *gorm.DB }
+type PaymentService struct {
+	db  *gorm.DB
+	rmq *rabbitmq.Client
+}
 
-func NewPaymentService(db *gorm.DB) *PaymentService { return &PaymentService{db: db} }
+func NewPaymentService(db *gorm.DB, rmq *rabbitmq.Client) *PaymentService {
+	return &PaymentService{db: db, rmq: rmq}
+}
 
 func (s *PaymentService) Initiate(clientID uint, req dto.InitiatePaymentRequest) (*dto.PaymentResponse, error) {
 	var order models.Order
@@ -43,6 +50,11 @@ func (s *PaymentService) Initiate(clientID uint, req dto.InitiatePaymentRequest)
 	}
 	if err := s.db.Create(payment).Error; err != nil { return nil, err }
 	resp := dto.ToPaymentResponse(payment)
+
+	if payment.Status == models.PaymentSuccess && s.rmq != nil {
+		_ = s.rmq.PublishJSON(context.Background(), "rydex_events", "payment.successful", resp)
+	}
+
 	return &resp, nil
 }
 
@@ -58,6 +70,11 @@ func (s *PaymentService) Verify(req dto.VerifyPaymentRequest) (*dto.PaymentRespo
 	p.PaidAt = &now
 	s.db.Save(&p)
 	resp := dto.ToPaymentResponse(&p)
+
+	if s.rmq != nil {
+		_ = s.rmq.PublishJSON(context.Background(), "rydex_events", "payment.successful", resp)
+	}
+
 	return &resp, nil
 }
 

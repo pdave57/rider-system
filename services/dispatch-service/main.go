@@ -1,14 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/joho/godotenv"
+	"github.com/rabbitmq/amqp091-go"
+	"github.com/rydex/dispatch-service/dto"
 	"github.com/rydex/dispatch-service/handler"
 	"github.com/rydex/dispatch-service/service"
 	"github.com/rydex/shared/models"
+	"github.com/rydex/shared/rabbitmq"
 	"github.com/rydex/shared/utils"
 )
 
@@ -17,7 +21,41 @@ func main() {
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "rydex_dispatch"))
 	db.AutoMigrate(&models.Dispatch{}, &models.RiderProfile{})
 	rdb := utils.NewRedis()
+	
 	svc := service.NewDispatchService(db, rdb)
+
+	rmqURL := utils.GetEnv("RABBITMQ_URL", "amqp://rydex:rydex_pass@localhost:5672/")
+	rmqClient, err := rabbitmq.Connect(rmqURL)
+	if err != nil {
+		log.Printf("[dispatch-service] warning: rabbitmq connection failed: %v", err)
+	} else {
+		log.Printf("[dispatch-service] connected to rabbitmq")
+		defer rmqClient.Close()
+		_ = rmqClient.SetupExchangeQueue("rydex_events", "topic", "dispatch_events_queue", "order.*")
+		_ = rmqClient.Channel.QueueBind("dispatch_events_queue", "payment.*", "rydex_events", false, nil)
+		
+		err := rmqClient.Consume("dispatch_events_queue", func(d amqp091.Delivery) {
+			log.Printf("[dispatch-service] Received event %s: %s", d.RoutingKey, string(d.Body))
+			
+			if d.RoutingKey == "payment.successful" {
+				var event struct {
+					OrderID uint `json:"order_id"`
+				}
+				if err := json.Unmarshal(d.Body, &event); err == nil && event.OrderID != 0 {
+					_, assignErr := svc.Assign(dto.AssignRequest{OrderID: event.OrderID})
+					if assignErr != nil {
+						log.Printf("[dispatch-service] Failed to auto-assign for order %d: %v", event.OrderID, assignErr)
+					} else {
+						log.Printf("[dispatch-service] Successfully auto-assigned rider for order %d", event.OrderID)
+					}
+				}
+			}
+		})
+		if err != nil {
+			log.Printf("[dispatch-service] warning: failed to start consumer: %v", err)
+		}
+	}
+
 	h := handler.NewDispatchHandler(svc)
 	port := utils.GetEnv("DISPATCH_SERVICE_PORT", "8083")
 	log.Printf("[dispatch-service] :%s", port)
