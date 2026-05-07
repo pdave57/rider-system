@@ -15,7 +15,7 @@ ENV GOOS=linux
 ENV GOFLAGS="-mod=mod"
 
 RUN go mod download
-RUN go build -o /service .
+RUN GOMAXPROCS=1 go build -p 1 -o /service .
 
 EXPOSE 8086
 CMD ["/service"]

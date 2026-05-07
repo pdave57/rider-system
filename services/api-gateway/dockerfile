@@ -15,7 +15,7 @@ ENV GOOS=linux
 ENV GOFLAGS="-mod=mod"
 
 RUN go mod download
-RUN go build -o /gateway .
+RUN GOMAXPROCS=1 go build -p 1 -o /gateway .
 
 EXPOSE 8001
 CMD ["/gateway"]
