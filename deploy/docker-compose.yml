@@ -90,7 +90,7 @@ services:
     env_file: ./env/.env
     environment:
       - AUTH_SERVICE_PORT=8081
-      - DB_NAME=ryder_auth
+      - DB_NAME=runns_auth
       - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
     depends_on:
       postgres:

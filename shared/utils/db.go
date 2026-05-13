@@ -17,7 +17,7 @@ func NewPostgres(dbName string) *gorm.DB {
 		GetEnv("DB_HOST", "localhost"),
 		GetEnv("DB_PORT", "5432"),
 		GetEnv("DB_USER", "admin"),
-		GetEnv("DB_PASSWORD", "letmein"),
+		GetEnv("DB_PASSWORD", "admin@123#"),
 		dbName,
 		GetEnv("DB_SSLMODE", "disable"),
 	)

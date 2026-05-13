@@ -9,24 +9,24 @@ echo "Creating Runns databases..."
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" << 'EOF'
 
-CREATE DATABASE Runns_auth;
-CREATE DATABASE Runns_orders;
-CREATE DATABASE Runns_dispatch;
-CREATE DATABASE Runns_payments;
-CREATE DATABASE Runns_riders;
+CREATE DATABASE runns_auth;
+CREATE DATABASE runns_orders;
+CREATE DATABASE runns_dispatch;
+CREATE DATABASE runns_payments;
+CREATE DATABASE runns_riders;
 
--- Grant all privileges to the postgres user on each database
-GRANT ALL PRIVILEGES ON DATABASE Runns_auth     TO postgres;
-GRANT ALL PRIVILEGES ON DATABASE Runns_orders   TO postgres;
-GRANT ALL PRIVILEGES ON DATABASE Runns_dispatch TO postgres;
-GRANT ALL PRIVILEGES ON DATABASE Runns_payments TO postgres;
-GRANT ALL PRIVILEGES ON DATABASE Runns_riders   TO postgres;
+-- Grant all privileges to the admin user on each database
+GRANT ALL PRIVILEGES ON DATABASE runns_auth TO admin;
+GRANT ALL PRIVILEGES ON DATABASE runns_orders TO admin;
+GRANT ALL PRIVILEGES ON DATABASE runns_dispatch TO admin;
+GRANT ALL PRIVILEGES ON DATABASE runns_payments TO admin;
+GRANT ALL PRIVILEGES ON DATABASE runns_riders TO admin;
 
 EOF
 
 echo "All databases created successfully:"
-echo "  - Runns_auth     (auth-service)"
-echo "  - Runns_orders   (order-service)"
-echo "  - Runns_dispatch (dispatch-service)"
-echo "  - Runns_payments (payment-service)"
-echo "  - Runns_riders   (rider-service)"
+echo "  - runns_auth     (auth-service)"
+echo "  - runns_orders   (order-service)"
+echo "  - runns_dispatch (dispatch-service)"
+echo "  - runns_payments (payment-service)"
+echo "  - runns_riders   (rider-service)"
