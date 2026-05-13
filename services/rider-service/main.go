@@ -15,10 +15,10 @@ import (
 
 func main() {
 	_ = godotenv.Load("../../deploy/env/.env")
-	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "rydex_riders"))
+	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_riders"))
 	db.AutoMigrate(&models.RiderProfile{})
 
-	rmqURL := utils.GetEnv("RABBITMQ_URL", "amqp://rydex:rydex_pass@localhost:5672/")
+	rmqURL := utils.GetEnv("RABBITMQ_URL", "amqp://ryder:ryder_pass@localhost:5672/")
 	rmqClient, err := rabbitmq.Connect(rmqURL)
 	if err != nil {
 		log.Printf("[rider-service] warning: rabbitmq connection failed: %v", err)

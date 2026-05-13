@@ -3,10 +3,10 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: rydex-postgres
+    container_name: runns-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin@123#
     ports:
       - "5432:5432"
     volumes:
@@ -20,7 +20,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: rydex-redis
+    container_name: runns-redis
     ports:
       - "6379:6379"
     volumes:
@@ -33,13 +33,13 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rydex-rabbitmq
+    container_name: runns-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: rydex
-      RABBITMQ_DEFAULT_PASS: rydex_pass
+      RABBITMQ_DEFAULT_USER: ryder
+      RABBITMQ_DEFAULT_PASS: ryder_pass
     healthcheck:
       test: ["CMD", "rabbitmqctl", "status"]
       interval: 10s
@@ -48,7 +48,7 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: rydex-nginx
+    container_name: runns-nginx
     ports:
       - "80:80"
     volumes:
@@ -61,7 +61,7 @@ services:
     build:
       context: ..
       dockerfile: services/api-gateway/dockerfile
-    container_name: rydex-gateway
+    container_name: runns-gateway
     env_file: ./env/.env
     environment:
       - GATEWAY_PORT=8001
@@ -86,12 +86,12 @@ services:
     build:
       context: ..
       dockerfile: services/auth-service/dockerfile
-    container_name: rydex-auth
+    container_name: runns-auth
     env_file: ./env/.env
     environment:
       - AUTH_SERVICE_PORT=8081
-      - DB_NAME=rydex_auth
-      - RABBITMQ_URL=amqp://rydex:rydex_pass@rabbitmq:5672/
+      - DB_NAME=ryder_auth
+      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -102,12 +102,12 @@ services:
     build:
       context: ..
       dockerfile: services/order-service/dockerfile
-    container_name: rydex-order
+    container_name: runns-order
     env_file: ./env/.env
     environment:
       - ORDER_SERVICE_PORT=8082
-      - DB_NAME=rydex_orders
-      - RABBITMQ_URL=amqp://rydex:rydex_pass@rabbitmq:5672/
+      - DB_NAME=runns_orders
+      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -118,12 +118,12 @@ services:
     build:
       context: ..
       dockerfile: services/dispatch-service/dockerfile
-    container_name: rydex-dispatch
+    container_name: runns-dispatch
     env_file: ./env/.env
     environment:
       - DISPATCH_SERVICE_PORT=8083
-      - DB_NAME=rydex_dispatch
-      - RABBITMQ_URL=amqp://rydex:rydex_pass@rabbitmq:5672/
+      - DB_NAME=runns_dispatch
+      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -136,12 +136,12 @@ services:
     build:
       context: ..
       dockerfile: services/payment-service/dockerfile
-    container_name: rydex-payment
+    container_name: runns-payment
     env_file: ./env/.env
     environment:
       - PAYMENT_SERVICE_PORT=8084
-      - DB_NAME=rydex_payments
-      - RABBITMQ_URL=amqp://rydex:rydex_pass@rabbitmq:5672/
+      - DB_NAME=runns_payments
+      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -152,11 +152,11 @@ services:
     build:
       context: ..
       dockerfile: services/realtime-service/dockerfile
-    container_name: rydex-realtime
+    container_name: runns-realtime
     env_file: ./env/.env
     environment:
       - REALTIME_SERVICE_PORT=8085
-      - RABBITMQ_URL=amqp://rydex:rydex_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
     depends_on:
       redis:
         condition: service_healthy
@@ -167,12 +167,12 @@ services:
     build:
       context: ..
       dockerfile: services/rider-service/dockerfile
-    container_name: rydex-rider
+    container_name: runns-rider
     env_file: ./env/.env
     environment:
       - RIDER_SERVICE_PORT=8086
-      - DB_NAME=rydex_riders
-      - RABBITMQ_URL=amqp://rydex:rydex_pass@rabbitmq:5672/
+      - DB_NAME=runns_riders
+      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy

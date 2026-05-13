@@ -14,9 +14,8 @@ import (
 
 func main() {
 	_ = godotenv.Load("../../deploy/env/.env")
-	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "rydex_auth"))
-	db.AutoMigrate(&models.User{}, &models.RiderProfile{}, &models.ClientProfile{})
-	
+	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_auth"))
+	db.AutoMigrate(&models.User{}, &models.RiderProfile{}, &models.ClientProfile{})	
 	svc := service.NewAuthService(db)
 	h := handler.NewAuthHandler(svc)
 	port := utils.GetEnv("AUTH_SERVICE_PORT", "8081")

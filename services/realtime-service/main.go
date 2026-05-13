@@ -17,7 +17,7 @@ func main() {
 	_ = godotenv.Load("../../deploy/env/.env")
 	rdb := utils.NewRedis()
 
-	rmqURL := utils.GetEnv("RABBITMQ_URL", "amqp://rydex:rydex_pass@localhost:5672/")
+	rmqURL := utils.GetEnv("RABBITMQ_URL", "amqp://ryder:ryder_pass@localhost:5672/")
 	rmqClient, err := rabbitmq.Connect(rmqURL)
 	if err != nil {
 		log.Printf("[realtime-service] warning: rabbitmq connection failed: %v", err)
