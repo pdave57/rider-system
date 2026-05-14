@@ -1,10 +1,10 @@
-module github.com/rydex/api-gateway
+module github.com/runns/api-gateway
 
 go 1.22
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/rydex/shared v0.0.0
+	github.com/runns/shared v0.0.0
 )
 
 require (
@@ -23,4 +23,4 @@ require (
 	gorm.io/gorm v1.25.9 // indirect
 )
 
-replace github.com/rydex/shared => ../../shared
+replace github.com/runns/shared => ../../shared

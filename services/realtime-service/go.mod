@@ -1,11 +1,11 @@
-module github.com/rydex/realtime-service
+module github.com/runns/realtime-service
 
 go 1.22
 
 require (
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.5.1
-	github.com/rydex/shared v0.0.0
+	github.com/runns/shared v0.0.0
 )
 
 require (
@@ -24,4 +24,4 @@ require (
 	gorm.io/gorm v1.25.9 // indirect
 )
 
-replace github.com/rydex/shared => ../../shared
+replace github.com/runns/shared => ../../shared

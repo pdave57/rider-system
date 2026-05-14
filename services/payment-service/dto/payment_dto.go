@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/rydex/shared/models"
+import "github.com/runns/shared/models"
 
 type InitiatePaymentRequest struct {
 	OrderID uint                 `json:"order_id"`

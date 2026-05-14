@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/rydex/auth-service/dto"
-	"github.com/rydex/auth-service/service"
-	"github.com/rydex/shared/middleware"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/auth-service/dto"
+	"github.com/runns/auth-service/service"
+	"github.com/runns/shared/middleware"
+	"github.com/runns/shared/utils"
 )
 
 type AuthHandler struct{ svc *service.AuthService }

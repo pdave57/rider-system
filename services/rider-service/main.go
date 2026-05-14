@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/joho/godotenv"
-	"github.com/rydex/rider-service/handler"
-	"github.com/rydex/rider-service/service"
-	"github.com/rydex/shared/models"
-	"github.com/rydex/shared/rabbitmq"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/rider-service/handler"
+	"github.com/runns/rider-service/service"
+	"github.com/runns/shared/models"
+	"github.com/runns/shared/rabbitmq"
+	"github.com/runns/shared/utils"
 )
 
 func main() {

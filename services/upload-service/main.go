@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/joho/godotenv"
-	"github.com/rydex/shared/models"
-	"github.com/rydex/shared/utils"
-	"github.com/rydex/upload-service/handler"
-	"github.com/rydex/upload-service/service"
+	"github.com/runns/shared/models"
+	"github.com/runns/shared/utils"
+	"github.com/runns/upload-service/handler"
+	"github.com/runns/upload-service/service"
 )
 
 func main() {

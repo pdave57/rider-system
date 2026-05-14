@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rydex/shared/middleware"
-	"github.com/rydex/shared/models"
+	"github.com/runns/shared/middleware"
+	"github.com/runns/shared/models"
 )
 
 func generateToken(userID uint, email string, role models.Role) (string, error) {

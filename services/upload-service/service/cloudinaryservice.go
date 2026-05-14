@@ -11,7 +11,7 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
-	"github.com/rydex/shared/models"
+	"github.com/runns/shared/models"
 	"gorm.io/gorm"
 )
 

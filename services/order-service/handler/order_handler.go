@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/rydex/order-service/dto"
-	"github.com/rydex/order-service/service"
-	"github.com/rydex/shared/middleware"
-	"github.com/rydex/shared/models"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/order-service/dto"
+	"github.com/runns/order-service/service"
+	"github.com/runns/shared/middleware"
+	"github.com/runns/shared/models"
+	"github.com/runns/shared/utils"
 )
 
 //initiate dependency injection

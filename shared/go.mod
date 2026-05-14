@@ -1,4 +1,4 @@
-module github.com/rydex/shared
+module github.com/runns/shared
 
 go 1.22
 

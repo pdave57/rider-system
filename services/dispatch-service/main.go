@@ -8,12 +8,12 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/rabbitmq/amqp091-go"
-	"github.com/rydex/dispatch-service/dto"
-	"github.com/rydex/dispatch-service/handler"
-	"github.com/rydex/dispatch-service/service"
-	"github.com/rydex/shared/models"
-	"github.com/rydex/shared/rabbitmq"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/dispatch-service/dto"
+	"github.com/runns/dispatch-service/handler"
+	"github.com/runns/dispatch-service/service"
+	"github.com/runns/shared/models"
+	"github.com/runns/shared/rabbitmq"
+	"github.com/runns/shared/utils"
 )
 
 func main() {

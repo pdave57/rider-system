@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 
-	"github.com/rydex/auth-service/dto"
-	"github.com/rydex/shared/models"
+	"github.com/runns/auth-service/dto"
+	"github.com/runns/shared/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/rydex/realtime-service/hub"
-	"github.com/rydex/shared/middleware"
-	"github.com/rydex/shared/models"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/realtime-service/hub"
+	"github.com/runns/shared/middleware"
+	"github.com/runns/shared/models"
+	"github.com/runns/shared/utils"
 )
 
 type RealtimeHandler struct {

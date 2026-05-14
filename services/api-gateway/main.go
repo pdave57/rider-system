@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/rydex/shared/middleware"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/shared/middleware"
+	"github.com/runns/shared/utils"
 )
 
 type route struct{ prefix, envKey string }

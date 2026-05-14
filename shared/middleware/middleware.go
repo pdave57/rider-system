@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rydex/shared/models"
+	"github.com/runns/shared/models"
 )
 
 type ctxKey string

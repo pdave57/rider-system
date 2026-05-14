@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/rydex/payment-service/dto"
-	"github.com/rydex/payment-service/service"
-	"github.com/rydex/shared/middleware"
-	"github.com/rydex/shared/models"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/payment-service/dto"
+	"github.com/runns/payment-service/service"
+	"github.com/runns/shared/middleware"
+	"github.com/runns/shared/models"
+	"github.com/runns/shared/utils"
 )
 
 type PaymentHandler struct{ svc *service.PaymentService }

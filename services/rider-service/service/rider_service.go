@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"github.com/rydex/shared/models"
+	"github.com/runns/shared/models"
 	"gorm.io/gorm"
 )
 

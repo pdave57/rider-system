@@ -1,11 +1,11 @@
-module github.com/rydex/upload-service
+module github.com/runns/upload-service
 
 go 1.22.2
 
 require (
 	github.com/cloudinary/cloudinary-go/v2 v2.15.0
 	github.com/joho/godotenv v1.5.1
-	github.com/rydex/shared v0.0.0-00010101000000-000000000000
+	github.com/runns/shared v0.0.0-00010101000000-000000000000
 	gorm.io/gorm v1.31.1
 )
 
@@ -27,4 +27,4 @@ require (
 	gorm.io/driver/postgres v1.5.7 // indirect
 )
 
-replace github.com/rydex/shared => ../../shared
+replace github.com/runns/shared => ../../shared

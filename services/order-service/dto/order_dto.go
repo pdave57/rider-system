@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/rydex/shared/models"
+import "github.com/runns/shared/models"
 
 type CreateOrderRequest struct {
 	PickupAddress    string  `json:"pickup_address"`

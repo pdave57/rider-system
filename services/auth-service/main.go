@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/joho/godotenv"
-	"github.com/rydex/auth-service/handler"
-	"github.com/rydex/auth-service/service"
-	"github.com/rydex/shared/models"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/auth-service/handler"
+	"github.com/runns/auth-service/service"
+	"github.com/runns/shared/models"
+	"github.com/runns/shared/utils"
 )
 
 func main() {

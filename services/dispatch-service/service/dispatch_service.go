@@ -9,8 +9,8 @@ import (
 	"time"
  
 	"github.com/redis/go-redis/v9"
-	"github.com/rydex/dispatch-service/dto"
-	"github.com/rydex/shared/models"
+	"github.com/runns/dispatch-service/dto"
+	"github.com/runns/shared/models"
 	"gorm.io/gorm"
 )
  

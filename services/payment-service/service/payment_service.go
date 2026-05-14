@@ -5,10 +5,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/rydex/payment-service/dto"
-	"github.com/rydex/shared/models"
-	"github.com/rydex/shared/rabbitmq"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/payment-service/dto"
+	"github.com/runns/shared/models"
+	"github.com/runns/shared/rabbitmq"
+	"github.com/runns/shared/utils"
 	"gorm.io/gorm"
 )
 

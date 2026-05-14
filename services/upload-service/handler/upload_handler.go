@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rydex/shared/middleware"
-	"github.com/rydex/shared/utils"
-	"github.com/rydex/upload-service/service"
+	"github.com/runns/shared/middleware"
+	"github.com/runns/shared/utils"
+	"github.com/runns/upload-service/service"
 )
 
 type UploadHandler struct {

@@ -7,10 +7,10 @@ import (
 	"net/http"
 
 	"github.com/joho/godotenv"
-	"github.com/rydex/realtime-service/handler"
-	"github.com/rydex/realtime-service/hub"
-	"github.com/rydex/shared/rabbitmq"
-	"github.com/rydex/shared/utils"
+	"github.com/runns/realtime-service/handler"
+	"github.com/runns/realtime-service/hub"
+	"github.com/runns/shared/rabbitmq"
+	"github.com/runns/shared/utils"
 )
 
 func main() {
