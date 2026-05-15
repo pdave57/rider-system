@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"errors"
+	"time"
 
 	"github.com/runns/auth-service/dto"
 	"github.com/runns/shared/models"
@@ -9,11 +11,19 @@ import (
 	"gorm.io/gorm"
 )
 
-//initiate dependency injection
-type AuthService struct{ db *gorm.DB }
+type AuthService struct {
+	db             *gorm.DB
+	EventPublisher EventPublisher
+}
+
 
 //dependency injection
-func NewAuthService(db *gorm.DB) *AuthService { return &AuthService{db: db} }
+func NewAuthService(db *gorm.DB, ep EventPublisher) *AuthService {
+	return &AuthService{
+		db:             db,
+		EventPublisher: ep,
+	}
+}
 
 func (s *AuthService) Register(req dto.RegisterRequest) (*dto.AuthResponse, error) {
 	if req.FullName == "" || req.Email == "" || req.Phone == "" || req.Password == "" {
@@ -47,6 +57,16 @@ func (s *AuthService) Register(req dto.RegisterRequest) (*dto.AuthResponse, erro
 	if err := s.db.Create(user).Error; err != nil {
 		return nil, errors.New("failed to create user: " + err.Error())
 	}
+	// Publish event asynchronously (don't block registration)
+    go func() {
+        ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+        defer cancel()
+        
+        if err := s.EventPublisher.PublishUserRegistered(ctx, user.ID, req); err != nil {
+            // Log error but don't fail registration
+            println("Failed to publish user registered event:", err.Error())
+        }
+    }()
 	token, err := generateToken(user.ID, user.Email, user.Role)
 	if err != nil {
 		return nil, err
@@ -85,4 +105,27 @@ func (s *AuthService) ChangePassword(userID uint, req dto.ChangePasswordRequest)
 	}
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	return s.db.Model(&user).Update("password", string(hashed)).Error
+}
+// Add new method for deactivating users
+func (s *AuthService) DeactivateUser(userID uint, reason string, adminID uint) error {
+    var user models.User
+    if err := s.db.First(&user, userID).Error; err != nil {
+        return errors.New("user not found")
+    }
+    
+    if err := s.db.Model(&user).Update("is_active", false).Error; err != nil {
+        return err
+    }
+    
+    // Publish deactivation event
+    go func() {
+        ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+        defer cancel()
+        
+        if err := s.EventPublisher.PublishUserDeactivated(ctx, userID, reason, adminID); err != nil {
+            println("Failed to publish deactivation event:", err.Error())
+        }
+    }()
+    
+    return nil
 }

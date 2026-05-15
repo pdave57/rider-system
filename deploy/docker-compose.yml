@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ../infra/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
+      - ../infra/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro    
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -22,9 +22,10 @@ services:
     image: redis:7-alpine
     container_name: runns-redis
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
       - redis_data:/data
+    
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -38,8 +39,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ryder
-      RABBITMQ_DEFAULT_PASS: ryder_pass
+      RABBITMQ_DEFAULT_USER: runns
+      RABBITMQ_DEFAULT_PASS: runnspass    
     healthcheck:
       test: ["CMD", "rabbitmqctl", "status"]
       interval: 10s
@@ -52,7 +53,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ../infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro    
     depends_on:
       - api-gateway
       - rabbitmq
@@ -81,7 +82,7 @@ services:
       - payment-service
       - realtime-service
       - rider-service
-
+    
   auth-service:
     build:
       context: ..
@@ -91,13 +92,13 @@ services:
     environment:
       - AUTH_SERVICE_PORT=8081
       - DB_NAME=runns_auth
-      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
+    
   order-service:
     build:
       context: ..
@@ -107,13 +108,13 @@ services:
     environment:
       - ORDER_SERVICE_PORT=8082
       - DB_NAME=runns_orders
-      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
+    
   dispatch-service:
     build:
       context: ..
@@ -123,7 +124,7 @@ services:
     environment:
       - DISPATCH_SERVICE_PORT=8083
       - DB_NAME=runns_dispatch
-      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -131,7 +132,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
+  
   payment-service:
     build:
       context: ..
@@ -141,13 +142,12 @@ services:
     environment:
       - PAYMENT_SERVICE_PORT=8084
       - DB_NAME=runns_payments
-      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
   realtime-service:
     build:
       context: ..
@@ -156,13 +156,12 @@ services:
     env_file: ./env/.env
     environment:
       - REALTIME_SERVICE_PORT=8085
-      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
     depends_on:
       redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
   rider-service:
     build:
       context: ..
@@ -172,13 +171,12 @@ services:
     environment:
       - RIDER_SERVICE_PORT=8086
       - DB_NAME=runns_riders
-      - RABBITMQ_URL=amqp://ryder:ryder_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
 volumes:
   postgres_data:
   redis_data:

@@ -1,4 +1,4 @@
-# Rydex — Quick Start Guide
+# Runns — Quick Start Guide
 
 Get the complete delivery platform running in 3 commands.
 
@@ -14,7 +14,7 @@ Get the complete delivery platform running in 3 commands.
 ## 1️⃣ Start Everything
 
 ```bash
-cd rydex-system/deploy
+cd rider-system/deploy
 docker-compose up --build
 ```
 

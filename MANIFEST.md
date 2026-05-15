@@ -1,4 +1,4 @@
-# Rydex Microservices System — Complete Manifest
+# runns Microservices System — Complete Manifest
 
 A **7-service microservices delivery platform** in Go with PostgreSQL, Redis, WebSockets, and Docker Compose. Production-grade architecture, database-per-service isolation, and unified API gateway.
 
@@ -33,7 +33,7 @@ A **7-service microservices delivery platform** in Go with PostgreSQL, Redis, We
 ## 📦 Project Structure
 
 ```
-rydex-system/
+rider-system/
 ├── services/                    # 6 microservices + 1 gateway
 │   ├── api-gateway/
 │   │   ├── go.mod
@@ -140,7 +140,7 @@ rydex-system/
 Each service has its **own isolated schema** for independent scaling:
 
 ```sql
--- auth-service: rydex_auth
+-- auth-service: runns_auth
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   full_name VARCHAR(120) NOT NULL,
@@ -171,7 +171,7 @@ CREATE TABLE client_profiles (
   wallet_balance DECIMAL(12,2) DEFAULT 0
 );
 
--- order-service: rydex_orders
+-- order-service: runns_orders
 CREATE TABLE orders (
   id SERIAL PRIMARY KEY,
   tracking_code VARCHAR(20) UNIQUE NOT NULL,
@@ -185,7 +185,7 @@ CREATE TABLE orders (
   created_at TIMESTAMP
 );
 
--- dispatch-service: rydex_dispatch
+-- dispatch-service: runns_dispatch
 CREATE TABLE dispatches (
   id SERIAL PRIMARY KEY,
   order_id INT UNIQUE NOT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE dispatches (
   rejected_at TIMESTAMP
 );
 
--- payment-service: rydex_payments
+-- payment-service: runns_payments
 CREATE TABLE payments (
   id SERIAL PRIMARY KEY,
   order_id INT NOT NULL,
@@ -489,7 +489,7 @@ Uses Redis GEORADIUS (O(N+log(M)) complexity) for fast nearest-neighbor lookup.
 
 ### Add a New Service
 1. Create `services/my-service/`
-2. Write `go.mod` with `replace github.com/rydex/shared => ../../shared`
+2. Write `go.mod` with `replace github.com/runns/shared => ../../shared`
 3. Import `shared/models`, `shared/middleware`, `shared/utils`
 4. Implement handler → service → repository layers
 5. Add to `go.work`

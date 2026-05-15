@@ -1,6 +1,6 @@
-# Rydex System Architecture
+# Runns System Architecture
 
-Rydex is a **microservices-based delivery and logistics platform** built in Go with JWT authentication, PostgreSQL, Redis, WebSockets for realtime GPS tracking, and Nginx reverse proxy.
+Runns is a **microservices-based delivery and logistics platform** built in Go with JWT authentication, PostgreSQL, Redis, WebSockets for realtime GPS tracking, and Nginx reverse proxy.
 
 ---
 
@@ -34,7 +34,7 @@ Clients (Mobile/Web)
 
 ### 1. auth-service
 - **Responsibilities**: User registration (client/rider/admin), login, JWT generation, password change
-- **Database**: `rydex_auth` (users, rider_profiles, client_profiles)
+- **Database**: `runns_auth` (users, rider_profiles, client_profiles)
 - **Endpoints**:
   - `POST /api/auth/register`
   - `POST /api/auth/login`
@@ -43,7 +43,7 @@ Clients (Mobile/Web)
 
 ### 2. order-service
 - **Responsibilities**: Order creation, tracking, status transitions, cancellation
-- **Database**: `rydex_orders` (orders, payments)
+- **Database**: `runns_orders` (orders, payments)
 - **Endpoints**:
   - `POST /api/orders` (client)
   - `GET /api/orders` (role-based: client sees own, rider sees assigned, admin sees all pending)
@@ -54,7 +54,7 @@ Clients (Mobile/Web)
 
 ### 3. dispatch-service
 - **Responsibilities**: Assign orders to riders (manual or nearest auto-assign), accept/reject dispatch
-- **Database**: `rydex_dispatch` (dispatches, rider_profiles)
+- **Database**: `runns_dispatch` (dispatches, rider_profiles)
 - **Redis**: GEORADIUS for nearest rider lookup, GPS event cache
 - **Endpoints**:
   - `POST /api/dispatch` (admin: assign order)
@@ -64,7 +64,7 @@ Clients (Mobile/Web)
 
 ### 4. payment-service
 - **Responsibilities**: Payment initiation (card/wallet/cash), wallet topup, verification
-- **Database**: `rydex_payments` (payments, client_profiles for wallet balance)
+- **Database**: `runns_payments` (payments, client_profiles for wallet balance)
 - **Endpoints**:
   - `POST /api/payments` (client: initiate)
   - `POST /api/payments/verify` (admin)
@@ -82,7 +82,7 @@ Clients (Mobile/Web)
 
 ### 6. rider-service
 - **Responsibilities**: Rider profile, availability toggle, location update
-- **Database**: `rydex_riders` (rider_profiles)
+- **Database**: `runns_riders` (rider_profiles)
 - **Endpoints**:
   - `GET /api/riders/me` (rider)
   - `PATCH /api/riders/me/availability` (rider)
@@ -105,7 +105,7 @@ Clients (Mobile/Web)
 
 ## Shared Layer
 
-All services import `github.com/rydex/shared`:
+All services import `github.com/runns/shared`:
 - **models**: GORM models (User, Order, Payment, Dispatch, RiderProfile, ClientProfile, GPSEvent)
 - **middleware**: JWT authentication, role guards, CORS, logging
 - **utils**: JSON response helpers, ID generators, distance calculation, DB connection helpers

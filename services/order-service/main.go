@@ -18,8 +18,7 @@ func main() {
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_orders"))
 	db.AutoMigrate(&models.Order{})
 	
-	rmqURL := utils.GetEnv("RABBITMQ_URL", "amqp://ryder:ryder_pass@localhost:5672/")
-	rmqClient, err := rabbitmq.Connect(rmqURL)
+	rmqClient, err := rabbitmq.NewClient()
 	if err != nil {
 		log.Printf("[order-service] warning: rabbitmq connection failed: %v", err)
 	} else {

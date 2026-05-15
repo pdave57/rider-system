@@ -24,8 +24,7 @@ func main() {
 	
 	svc := service.NewDispatchService(db, rdb)
 
-	rmqURL := utils.GetEnv("RABBITMQ_URL", "amqp://ryder:ryder_pass@localhost:5672/")
-	rmqClient, err := rabbitmq.Connect(rmqURL)
+	rmqClient, err := rabbitmq.NewClient()
 	if err != nil {
 		log.Printf("[dispatch-service] warning: rabbitmq connection failed: %v", err)
 	} else {
