@@ -61,7 +61,7 @@ func (h *OrderHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	if err != nil { utils.BadRequest(w, "invalid order id"); return }
 	var req dto.UpdateStatusRequest
 	if err := utils.DecodeJSON(r, &req); err != nil { utils.BadRequest(w, "invalid body"); return }
-	resp, err := h.svc.UpdateStatus(id, req)
+	resp, err := h.svc.UpdateStatus(id, req, middleware.UserIDFrom(r.Context()))
 	if err != nil { utils.BadRequest(w, err.Error()); return }
 	utils.OK(w, "status updated", resp)
 }

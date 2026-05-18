@@ -57,7 +57,7 @@ func (p *eventPublisher) PublishUserRegistered(ctx context.Context, userID uint,
     event := events.UserRegisteredEvent{
         BaseEvent: events.BaseEvent{
             EventID:   uuid.New().String(),
-            EventType: events.UserRegistered,
+            EventType: events.RoutingKeyUserRegistered,
             Timestamp: time.Now(),
             Service:   "auth-service",
             Version:   "1.0",
@@ -66,7 +66,7 @@ func (p *eventPublisher) PublishUserRegistered(ctx context.Context, userID uint,
     }
 
     // Choose routing key based on role
-    routingKey := events.UserRegistered
+    routingKey := events.RoutingKeyUserRegistered
     switch registerReq.Role {
     case "rider":
         routingKey = "user.registered.rider"
@@ -81,7 +81,7 @@ func (p *eventPublisher) PublishUserRoleChanged(ctx context.Context, userID uint
     event := events.UserRoleChangedEvent{
         BaseEvent: events.BaseEvent{
             EventID:   uuid.New().String(),
-            EventType: events.UserRoleChanged,
+            EventType: events.RoutingKeyUserRoleChanged,
             Timestamp: time.Now(),
             Service:   "auth-service",
             Version:   "1.0",
@@ -95,7 +95,7 @@ func (p *eventPublisher) PublishUserRoleChanged(ctx context.Context, userID uint
         },
     }
 
-    routingKey := events.UserRoleChanged
+    routingKey := events.RoutingKeyUserRoleChanged
     if newRole == "rider" {
         routingKey = "user.role_changed.to_rider"
     }
@@ -107,7 +107,7 @@ func (p *eventPublisher) PublishUserDeactivated(ctx context.Context, userID uint
     event := events.UserDeactivatedEvent{
         BaseEvent: events.BaseEvent{
             EventID:   uuid.New().String(),
-            EventType: events.UserDeactivated,
+            EventType: events.RoutingKeyUserDeactivated,
             Timestamp: time.Now(),
             Service:   "auth-service",
             Version:   "1.0",
@@ -120,5 +120,5 @@ func (p *eventPublisher) PublishUserDeactivated(ctx context.Context, userID uint
         },
     }
 
-    return p.rabbitClient.PublishEvent(ctx, events.UserDeactivated, event)
+    return p.rabbitClient.PublishEvent(ctx, events.RoutingKeyUserDeactivated, event)
 }
