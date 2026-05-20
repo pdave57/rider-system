@@ -6,7 +6,7 @@ WORKDIR /build/gateway
 RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -o /app/gateway .
 
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+RUN apk update && apk add --no-cache ca-certificates
 WORKDIR /app
 COPY --from=builder /app/gateway .
 EXPOSE 8001

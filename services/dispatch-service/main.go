@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/joho/godotenv"
-	"github.com/rabbitmq/amqp091-go"
 	"github.com/runns/dispatch-service/dto"
 	"github.com/runns/dispatch-service/handler"
 	"github.com/runns/dispatch-service/service"
@@ -21,7 +20,7 @@ func main() {
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_dispatch"))
 	db.AutoMigrate(&models.Dispatch{}, &models.RiderProfile{})
 	rdb := utils.NewRedis()
-	
+
 	svc := service.NewDispatchService(db, rdb)
 
 	rmqClient, err := rabbitmq.NewClient()
@@ -30,25 +29,27 @@ func main() {
 	} else {
 		log.Printf("[dispatch-service] connected to rabbitmq")
 		defer rmqClient.Close()
-		_ = rmqClient.SetupExchangeQueue("rydex_events", "topic", "dispatch_events_queue", "order.*")
-		_ = rmqClient.Channel.QueueBind("dispatch_events_queue", "payment.*", "rydex_events", false, nil)
-		
-		err := rmqClient.Consume("dispatch_events_queue", func(d amqp091.Delivery) {
-			log.Printf("[dispatch-service] Received event %s: %s", d.RoutingKey, string(d.Body))
-			
-			if d.RoutingKey == "payment.successful" {
-				var event struct {
-					OrderID uint `json:"order_id"`
-				}
-				if err := json.Unmarshal(d.Body, &event); err == nil && event.OrderID != 0 {
-					_, assignErr := svc.Assign(dto.AssignRequest{OrderID: event.OrderID})
-					if assignErr != nil {
-						log.Printf("[dispatch-service] Failed to auto-assign for order %d: %v", event.OrderID, assignErr)
-					} else {
-						log.Printf("[dispatch-service] Successfully auto-assigned rider for order %d", event.OrderID)
-					}
-				}
+
+		err := rmqClient.Consume("dispatch_events_queue", "rydex_events", "payment.*", func(body []byte) error {
+			log.Printf("[dispatch-service] Received event: %s", string(body))
+
+			var event struct {
+				OrderID uint `json:"order_id"`
 			}
+			if err := json.Unmarshal(body, &event); err != nil {
+				return err
+			}
+			if event.OrderID == 0 {
+				return nil
+			}
+
+			_, assignErr := svc.Assign(dto.AssignRequest{OrderID: event.OrderID})
+			if assignErr != nil {
+				log.Printf("[dispatch-service] Failed to auto-assign for order %d: %v", event.OrderID, assignErr)
+				return assignErr
+			}
+			log.Printf("[dispatch-service] Successfully auto-assigned rider for order %d", event.OrderID)
+			return nil
 		})
 		if err != nil {
 			log.Printf("[dispatch-service] warning: failed to start consumer: %v", err)

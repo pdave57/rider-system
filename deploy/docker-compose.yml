@@ -92,7 +92,7 @@ services:
     environment:
       - AUTH_SERVICE_PORT=8081
       - DB_NAME=runns_auth
-      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runnspass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -108,7 +108,7 @@ services:
     environment:
       - ORDER_SERVICE_PORT=8082
       - DB_NAME=runns_orders
-      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runnspass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -124,7 +124,7 @@ services:
     environment:
       - DISPATCH_SERVICE_PORT=8083
       - DB_NAME=runns_dispatch
-      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runnspass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -142,7 +142,7 @@ services:
     environment:
       - PAYMENT_SERVICE_PORT=8084
       - DB_NAME=runns_payments
-      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runnspass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy
@@ -156,7 +156,7 @@ services:
     env_file: ./env/.env
     environment:
       - REALTIME_SERVICE_PORT=8085
-      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runnspass@rabbitmq:5672/
     depends_on:
       redis:
         condition: service_healthy
@@ -171,7 +171,7 @@ services:
     environment:
       - RIDER_SERVICE_PORT=8086
       - DB_NAME=runns_riders
-      - RABBITMQ_URL=amqp://runns:runns_pass@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://runns:runnspass@rabbitmq:5672/
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,6 +1,6 @@
 FROM golang:1.26-alpine
 
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk update && apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 COPY shared/ shared/
