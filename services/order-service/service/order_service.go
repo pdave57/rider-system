@@ -22,6 +22,33 @@ func NewOrderService(db *gorm.DB, rmqManager *rabbitmq.Client) *OrderService {
 	return &OrderService{db: db, rmqManager: rmqManager}
 }
 
+func (s *OrderService) SyncUser(event rabbitmq.UserRegisteredEvent) error {
+	user := models.User{
+		ID:       event.Data.UserID,
+		FullName: event.Data.FullName,
+		Email:    event.Data.Email,
+		Phone:    event.Data.Phone,
+		Role:     models.Role(event.Data.Role),
+		IsActive: true,
+	}
+
+	var existing models.User
+	if err := s.db.First(&existing, event.Data.UserID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return s.db.Create(&user).Error
+		}
+		return err
+	}
+
+	return s.db.Model(&existing).Updates(map[string]interface{}{
+		"full_name": user.FullName,
+		"email":     user.Email,
+		"phone":     user.Phone,
+		"role":      user.Role,
+		"is_active": user.IsActive,
+	}).Error
+}
+
 func (s *OrderService) Create(clientID uint, req dto.CreateOrderRequest) (*dto.OrderResponse, error) {
 	if req.PickupAddress == "" || req.DropoffAddress == "" {
 		return nil, errors.New("pickup_address and dropoff_address are required")

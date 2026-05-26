@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/joho/godotenv"
 	"github.com/runns/dispatch-service/dto"
 	"github.com/runns/dispatch-service/handler"
 	"github.com/runns/dispatch-service/service"
@@ -16,7 +15,7 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load("../../deploy/env/.env")
+	utils.LoadEnvFile(".env", "../../deploy/env/.env")
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_dispatch"))
 	db.AutoMigrate(&models.Dispatch{}, &models.RiderProfile{})
 	rdb := utils.NewRedis()

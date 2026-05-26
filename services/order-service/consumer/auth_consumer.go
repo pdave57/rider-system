@@ -24,9 +24,11 @@ func (c *AuthEventConsumer) Start() error {
 	queueName := "order_auth_events"
 
 	handlers := map[string]func([]byte) error{
-		rabbitmq.RoutingKeyUserRegistered:  c.handleUserRegistrationBytes,
-		rabbitmq.RoutingKeyUserRoleChanged: c.handleUserRoleChangedBytes,
-		rabbitmq.RoutingKeyUserDeactivated: c.handleUserDeactivatedBytes,
+		rabbitmq.RoutingKeyUserRegistered:    c.handleUserRegistrationBytes,
+		"user.registered.client":            c.handleUserRegistrationBytes,
+		"user.registered.rider":             c.handleUserRegistrationBytes,
+		rabbitmq.RoutingKeyUserRoleChanged:   c.handleUserRoleChangedBytes,
+		rabbitmq.RoutingKeyUserDeactivated:  c.handleUserDeactivatedBytes,
 	}
 
 	for binding, handler := range handlers {
@@ -70,7 +72,7 @@ func (c *AuthEventConsumer) handleUserDeactivatedBytes(body []byte) error {
 
 func (c *AuthEventConsumer) handleUserRegistration(event rabbitmq.UserRegisteredEvent) error {
 	log.Printf("Initializing data for user %d in order-service", event.Data.UserID)
-	return nil
+	return c.orderService.SyncUser(event)
 }
 
 func (c *AuthEventConsumer) handleUserRoleChanged(event rabbitmq.UserRoleChangedEvent) error {

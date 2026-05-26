@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/joho/godotenv"
 	"github.com/runns/realtime-service/handler"
 	"github.com/runns/realtime-service/hub"
 	"github.com/runns/shared/rabbitmq"
@@ -14,7 +13,7 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load("../../deploy/env/.env")
+	utils.LoadEnvFile(".env", "../../deploy/env/.env")
 	rdb := utils.NewRedis()
 
 	rmqClient, err := rabbitmq.NewClient()

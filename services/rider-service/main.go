@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/joho/godotenv"
 	"github.com/runns/rider-service/handler"
 	"github.com/runns/rider-service/service"
 	"github.com/runns/shared/models"
@@ -14,7 +13,7 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load("../../deploy/env/.env")
+	utils.LoadEnvFile(".env", "../../deploy/env/.env")
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_riders"))
 	db.AutoMigrate(&models.RiderProfile{})
 

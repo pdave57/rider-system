@@ -1,11 +1,8 @@
 module github.com/runns/api-gateway
 
-go 1.22
+go 1.26.0
 
-require (
-	github.com/joho/godotenv v1.5.1
-	github.com/runns/shared v0.0.0
-)
+require github.com/runns/shared v0.0.0
 
 require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -16,6 +13,7 @@ require (
 	github.com/jackc/pgx/v5 v5.4.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/redis/go-redis/v9 v9.5.1 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

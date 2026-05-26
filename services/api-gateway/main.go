@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/runns/shared/middleware"
 	"github.com/runns/shared/utils"
 )
@@ -27,7 +26,7 @@ var routes = []route{
 }
 
 func main() {
-	_ = godotenv.Load("../../deploy/env/.env")
+	utils.LoadEnvFile(".env", "../../deploy/env/.env")
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { utils.OK(w, "gateway healthy", nil) })
 	for _, rt := range routes {
@@ -37,7 +36,9 @@ func main() {
 			continue
 		}
 		tgt, err := url.Parse(targetURL)
-		if err != nil { log.Fatalf("invalid URL for %s: %v", rt.envKey, err) }
+		if err != nil {
+			log.Fatalf("invalid URL for %s: %v", rt.envKey, err)
+		}
 		proxy := httputil.NewSingleHostReverseProxy(tgt)
 		prefix := rt.prefix
 		mux.HandleFunc(prefix+"/", func(w http.ResponseWriter, r *http.Request) {

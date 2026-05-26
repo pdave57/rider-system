@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/joho/godotenv"
 	"github.com/runns/shared/models"
 	"github.com/runns/shared/utils"
 	"github.com/runns/upload-service/handler"
@@ -13,7 +12,7 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load(".env")
+	utils.LoadEnvFile(".env", "../../deploy/env/.env")
 
 	// Connect to the auth DB — that's where users and avatar fields live
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "rydex_auth"))
