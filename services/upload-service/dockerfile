@@ -15,5 +15,5 @@ ENV GOOS=linux
 RUN go mod download
 RUN go build -o /service .
 
-EXPOSE 8087
+EXPOSE 8087:8087
 CMD ["/service"]

@@ -17,5 +17,5 @@ ENV GOFLAGS="-mod=mod"
 RUN go mod download
 RUN GOMAXPROCS=1 go build -p 1 -o /service .
 
-EXPOSE 8083
+EXPOSE 8083:8083
 CMD ["/service"]

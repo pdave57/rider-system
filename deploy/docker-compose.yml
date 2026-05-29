@@ -18,6 +18,22 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: runns-pgadmin
+    env_file: ./env/.env
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin@123#
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
   redis:
     image: redis:7-alpine
     container_name: runns-redis
@@ -180,3 +196,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  pgadmin_data:

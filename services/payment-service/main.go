@@ -15,7 +15,7 @@ import (
 func main() {
 	utils.LoadEnvFile(".env", "../../deploy/env/.env")
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_payments"))
-	db.AutoMigrate(&models.Payment{}, &models.ClientProfile{})
+	db.AutoMigrate(&models.Payment{}, &models.ClientProfile{}, &models.Order{})
 
 	rmqClient, err := rabbitmq.NewClient()
 	if err != nil {
