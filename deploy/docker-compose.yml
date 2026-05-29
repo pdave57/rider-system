@@ -193,6 +193,20 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+
+  upload-service:
+    build:
+      context: ..
+      dockerfile: services/upload-service/dockerfile
+    container_name: runns-upload
+    env_file: ./env/.env
+    environment:
+      - UPLOAD_SERVICE_PORT=8087
+      - DB_NAME=runns_auth
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:
