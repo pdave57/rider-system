@@ -21,18 +21,27 @@ func NewAuthEventConsumer(rmqManager *rabbitmq.Client, orderService *service.Ord
 }
 
 func (c *AuthEventConsumer) Start() error {
-	queueName := "order_auth_events"
-
-	handlers := map[string]func([]byte) error{
-		rabbitmq.RoutingKeyUserRegistered:    c.handleUserRegistrationBytes,
-		"user.registered.client":            c.handleUserRegistrationBytes,
-		"user.registered.rider":             c.handleUserRegistrationBytes,
-		rabbitmq.RoutingKeyUserRoleChanged:   c.handleUserRoleChangedBytes,
-		rabbitmq.RoutingKeyUserDeactivated:  c.handleUserDeactivatedBytes,
+	// IMPORTANT: Each binding must use its OWN unique queue name.
+	// If all bindings share one queue, RabbitMQ round-robins messages
+	// across all consumer goroutines — so the wrong handler processes
+	// the wrong event type.
+	bindings := []struct {
+		queue      string
+		routingKey string
+		handler    func([]byte) error
+	}{
+		// Specific client/rider registration events (published by auth-service)
+		{"order_auth_user_registered_client", "user.registered.client", c.handleUserRegistrationBytes},
+		{"order_auth_user_registered_rider", "user.registered.rider", c.handleUserRegistrationBytes},
+		// Generic registration fallback (routing key "user.registered")
+		{"order_auth_user_registered", rabbitmq.RoutingKeyUserRegistered, c.handleUserRegistrationBytes},
+		// Role changes and deactivations
+		{"order_auth_role_changed", rabbitmq.RoutingKeyUserRoleChanged, c.handleUserRoleChangedBytes},
+		{"order_auth_user_deactivated", rabbitmq.RoutingKeyUserDeactivated, c.handleUserDeactivatedBytes},
 	}
 
-	for binding, handler := range handlers {
-		if err := c.rmqManager.Consume(queueName, rabbitmq.ExchangeAuthEvents, binding, handler); err != nil {
+	for _, b := range bindings {
+		if err := c.rmqManager.Consume(b.queue, rabbitmq.ExchangeAuthEvents, b.routingKey, b.handler); err != nil {
 			return err
 		}
 	}

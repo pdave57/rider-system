@@ -16,11 +16,21 @@ import (
 
 func main() {
 	utils.LoadEnvFile(".env", "../../deploy/env/.env")
+
+	// Dispatch DB — stores Dispatch records only
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_dispatch"))
-	db.AutoMigrate(&models.Dispatch{}, &models.RiderProfile{})
+	db.Config.DisableForeignKeyConstraintWhenMigrating = true
+	db.AutoMigrate(&models.Dispatch{})
+
+	// Orders DB — needed to look up and update Order records
+	ordersDB := utils.NewPostgres("runns_orders")
+
+	// Riders DB — needed to check and update RiderProfile availability
+	ridersDB := utils.NewPostgres("runns_riders")
+
 	rdb := utils.NewRedis()
 
-	svc := service.NewDispatchService(db, rdb)
+	svc := service.NewDispatchService(db, ordersDB, ridersDB, rdb)
 
 	rmqClient, err := rabbitmq.NewClient()
 	if err != nil {
@@ -29,19 +39,23 @@ func main() {
 		log.Printf("[dispatch-service] connected to rabbitmq")
 		defer rmqClient.Close()
 
-		err := rmqClient.Consume("dispatch_events_queue", "rydex_events", "payment.*", func(body []byte) error {
-			log.Printf("[dispatch-service] Received event: %s", string(body))
+		// Listen to order.created events from order-service
+		err := rmqClient.Consume("dispatch_order_events_queue", rabbitmq.ExchangeOrderEvents, rabbitmq.RoutingKeyOrderCreated, func(body []byte) error {
+			log.Printf("[dispatch-service] Received order.created event: %s", string(body))
 
 			var event struct {
 				OrderID uint `json:"order_id"`
 			}
 			if err := json.Unmarshal(body, &event); err != nil {
+				log.Printf("[dispatch-service] Failed to unmarshal event: %v", err)
 				return err
 			}
 			if event.OrderID == 0 {
+				log.Printf("[dispatch-service] Received event with no order_id, skipping")
 				return nil
 			}
 
+			log.Printf("[dispatch-service] Auto-assigning order %d", event.OrderID)
 			_, assignErr := svc.Assign(dto.AssignRequest{OrderID: event.OrderID})
 			if assignErr != nil {
 				log.Printf("[dispatch-service] Failed to auto-assign for order %d: %v", event.OrderID, assignErr)

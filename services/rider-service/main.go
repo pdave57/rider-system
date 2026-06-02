@@ -14,8 +14,16 @@ import (
 
 func main() {
 	utils.LoadEnvFile(".env", "../../deploy/env/.env")
+
+	// Riders DB — stores RiderProfile records
 	db := utils.NewPostgres(utils.GetEnv("DB_NAME", "runns_riders"))
 	db.AutoMigrate(&models.RiderProfile{})
+
+	// Auth DB — needed to fetch User records for profiles
+	authDB := utils.NewPostgres("runns_auth")
+
+	// Redis — for geo index used by dispatch service
+	rdb := utils.NewRedis()
 
 	rmqClient, err := rabbitmq.NewClient()
 	if err != nil {
@@ -26,7 +34,7 @@ func main() {
 		_ = rmqClient.SetupExchangeQueue("rydex_events", "topic", "rider_events_queue", "rider.*")
 	}
 
-	svc := service.NewRiderService(db)
+	svc := service.NewRiderService(db, authDB, rdb)
 	h := handler.NewRiderHandler(svc)
 	port := utils.GetEnv("RIDER_SERVICE_PORT", "8086")
 	log.Printf("[rider-service] :%s", port)
