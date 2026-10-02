@@ -105,3 +105,166 @@ func (s *PaymentService) TopupWallet(clientID uint, req dto.WalletTopupRequest) 
 	s.db.Save(&profile)
 	return &dto.WalletResponse{ClientID: clientID, WalletBalance: profile.WalletBalance}, nil
 }
+
+func (s *PaymentService) GetRiderWallet(riderID uint) (*dto.RiderWalletResponse, error) {
+	var wallet models.RiderWallet
+	if err := s.db.Where("user_id = ?", riderID).First(&wallet).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			wallet = models.RiderWallet{UserID: riderID, Balance: 0, PendingBalance: 0}
+			if err := s.db.Create(&wallet).Error; err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, errors.New("rider wallet not found")
+		}
+	}
+	return &dto.RiderWalletResponse{RiderID: riderID, Balance: wallet.Balance, PendingBalance: wallet.PendingBalance}, nil
+}
+
+func (s *PaymentService) TransferToRiderWallet(clientID uint, req dto.WalletTransferRequest) (*dto.WalletTransferResponse, error) {
+	if req.Amount <= 0 { return nil, errors.New("amount must be positive") }
+	if req.RiderID == 0 { return nil, errors.New("rider ID required") }
+
+	var clientProfile models.ClientProfile
+	if err := s.db.Where("user_id = ?", clientID).First(&clientProfile).Error; err != nil {
+		return nil, errors.New("client profile not found")
+	}
+	if clientProfile.WalletBalance < req.Amount { return nil, errors.New("insufficient wallet balance") }
+
+	var riderProfile models.RiderProfile
+	if err := s.db.Where("user_id = ?", req.RiderID).First(&riderProfile).Error; err != nil {
+		return nil, errors.New("rider not found")
+	}
+	if !riderProfile.NINVerified { return nil, errors.New("rider NIN not verified") }
+
+	var riderWallet models.RiderWallet
+	if err := s.db.Where("user_id = ?", req.RiderID).First(&riderWallet).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			riderWallet = models.RiderWallet{UserID: req.RiderID, Balance: 0, PendingBalance: 0}
+			if err := s.db.Create(&riderWallet).Error; err != nil { return nil, err }
+		} else { return nil, err }
+	}
+
+	tx := s.db.Begin()
+	clientProfile.WalletBalance -= req.Amount
+	if err := tx.Save(&clientProfile).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	riderWallet.PendingBalance += req.Amount
+	if err := tx.Save(&riderWallet).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	ref := utils.GeneratePaymentRef()
+	payment := &models.Payment{
+		OrderID: 0, ClientID: clientID, Amount: req.Amount,
+		Method: models.PaymentWallet, Status: models.PaymentSuccess,
+		Reference: ref, PaidAt: func() *time.Time { t := time.Now(); return &t }(),
+	}
+	if err := tx.Create(payment).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
+
+	if s.rmq != nil {
+		event := dto.WalletTransferEvent{
+			PaymentID:  payment.ID,
+			ClientID:   clientID,
+			RiderID:    req.RiderID,
+			Amount:     req.Amount,
+			Reference:  ref,
+			Timestamp:  time.Now(),
+		}
+		_ = s.rmq.PublishJSON(context.Background(), "rydex_events", "wallet.transferred", event)
+	}
+
+	return &dto.WalletTransferResponse{
+		Reference: ref, Amount: req.Amount,
+		ClientNewBalance: clientProfile.WalletBalance,
+		RiderNewBalance:  riderWallet.Balance + req.Amount,
+	}, nil
+}
+
+func (s *PaymentService) ReleaseRiderFunds(riderID uint, amount float64, reference string) error {
+	if amount <= 0 { return errors.New("amount must be positive") }
+	var wallet models.RiderWallet
+	if err := s.db.Where("user_id = ?", riderID).First(&wallet).Error; err != nil {
+		return errors.New("rider wallet not found")
+	}
+	if wallet.PendingBalance < amount { return errors.New("insufficient pending balance") }
+	wallet.PendingBalance -= amount
+	wallet.Balance += amount
+	return s.db.Save(&wallet).Error
+}
+
+func (s *PaymentService) VerifyNIN(riderID uint, nin string) error {
+	var profile models.RiderProfile
+	if err := s.db.Where("user_id = ?", riderID).First(&profile).Error; err != nil {
+		return errors.New("rider profile not found")
+	}
+	if profile.NINVerified { return errors.New("NIN already verified") }
+	profile.NIN = nin
+	profile.NINVerified = true
+	now := time.Now()
+	profile.NINVerifiedAt = &now
+	return s.db.Save(&profile).Error
+}
+
+func (s *PaymentService) GetNINStatus(riderID uint) (*dto.NINStatusResponse, error) {
+	var profile models.RiderProfile
+	if err := s.db.Where("user_id = ?", riderID).First(&profile).Error; err != nil {
+		return nil, errors.New("rider profile not found")
+	}
+	return &dto.NINStatusResponse{
+		RiderID:     riderID,
+		NINVerified: profile.NINVerified,
+		NIN:         profile.NIN,
+		VerifiedAt:  profile.NINVerifiedAt,
+	}, nil
+}
+
+func (s *PaymentService) SyncUser(event rabbitmq.UserRegisteredEvent) error {
+	user := models.User{
+		ID:       event.Data.UserID,
+		FullName: event.Data.FullName,
+		Email:    event.Data.Email,
+		Phone:    event.Data.Phone,
+		Role:     models.Role(event.Data.Role),
+		IsActive: true,
+	}
+
+	var existing models.User
+	if err := s.db.First(&existing, event.Data.UserID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if err := s.db.Create(&user).Error; err != nil {
+				return err
+			}
+			// Create profile based on role
+			if event.Data.Role == string(models.RoleClient) {
+				profile := models.ClientProfile{UserID: event.Data.UserID}
+				return s.db.Create(&profile).Error
+			} else if event.Data.Role == string(models.RoleRider) {
+				profile := models.RiderProfile{
+					UserID:       event.Data.UserID,
+					VehicleType:  models.VehicleType(event.Data.VehicleType),
+					VehiclePlate: event.Data.VehiclePlate,
+					LicenseNumber: event.Data.LicenseNumber,
+				}
+				return s.db.Create(&profile).Error
+			}
+			return nil
+		}
+		return err
+	}
+
+	return s.db.Model(&existing).Updates(map[string]interface{}{
+		"full_name": user.FullName,
+		"email":     user.Email,
+		"phone":     user.Phone,
+		"role":      user.Role,
+		"is_active": user.IsActive,
+	}).Error
+}

@@ -1,0 +1,14 @@
+.git
+.gitignore
+.dockerignore
+**/*.log
+**/node_modules
+services/realtime-service/realtime-service
+services/auth-service/auth-service
+services/order-service/order-service
+services/payment-service/payment-service
+services/rider-service/rider-service
+services/shopforme-service/shopforme-service
+services/upload-service/upload-service
+services/dispatch-service/dispatch-service
+services/api-gateway/api-gateway

@@ -40,7 +40,7 @@ func (s *DispatchService) Assign(req dto.AssignRequest) (*dto.DispatchResponse, 
 		var err error
 		riderID, err = s.nearestRider(order.PickupLatitude, order.PickupLongitude)
 		if err != nil {
-			return nil, errors.New("no available riders nearby")
+			return nil, err
 		}
 	}
 
@@ -123,10 +123,15 @@ func (s *DispatchService) UpdateRiderLocation(riderID uint, lat, lon float64) er
 	}).Err()
 }
 
-func (s *DispatchService) nearestRider(lat, lon float64) (uint, error) {
+func (s *DispatchService) findNearestAvailableRider(lat, lon float64, radiusKm float64) (uint, error) {
 	ctx := context.Background()
 	results, err := s.rdb.GeoRadius(ctx, "rider:locations", lon, lat,
-		&redis.GeoRadiusQuery{Radius: 50, Unit: "km", WithCoord: true, Sort: "ASC", Count: 10}).Result()
+		&redis.GeoRadiusQuery{
+			Radius:    radiusKm,
+			Unit:      "km",
+			WithCoord: true,
+			Sort:      "ASC",
+		}).Result()
 	if err != nil || len(results) == 0 {
 		return 0, errors.New("no riders found in geo index")
 	}
@@ -141,15 +146,31 @@ func (s *DispatchService) nearestRider(lat, lon float64) (uint, error) {
 			continue
 		}
 		dist := haversine(lat, lon, loc.Latitude, loc.Longitude)
-		if dist < bestDist {
+		if dist <= radiusKm && dist < bestDist {
 			bestDist = dist
 			bestID = id
 		}
 	}
 	if bestID == 0 {
-		return 0, errors.New("no available riders")
+		return 0, errors.New("no available riders in radius")
 	}
 	return bestID, nil
+}
+
+func (s *DispatchService) nearestRider(lat, lon float64) (uint, error) {
+	// First check 1km radius
+	id, err := s.findNearestAvailableRider(lat, lon, 1.0)
+	if err == nil && id != 0 {
+		return id, nil
+	}
+
+	// Fallback to 2km radius if no available rider within 1km
+	id, err = s.findNearestAvailableRider(lat, lon, 2.0)
+	if err == nil && id != 0 {
+		return id, nil
+	}
+
+	return 0, errors.New("no available riders within 2km radius")
 }
 
 func haversine(lat1, lon1, lat2, lon2 float64) float64 {

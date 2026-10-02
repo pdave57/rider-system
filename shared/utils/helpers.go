@@ -66,3 +66,14 @@ func PathID(path, prefix string) (uint, error) {
 	raw = strings.Trim(raw, "/")
 	return ParseUint(raw, nil)
 }
+
+func ParseUintPath(path, suffix string) uint {
+	parts := strings.Split(path, "/")
+	for i := len(parts) - 1; i >= 0; i-- {
+		if parts[i] == suffix && i > 0 {
+			v, _ := strconv.ParseUint(parts[i-1], 10, 64)
+			return uint(v)
+		}
+	}
+	return 0
+}

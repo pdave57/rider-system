@@ -8,24 +8,25 @@ Runns is a **microservices-based delivery and logistics platform** built in Go w
 
 ```
 Clients (Mobile/Web)
-       ↓
-    Nginx (port 80)
-       ↓
-  API Gateway (port 8080)
-       ↓
-  ┌──────────────────────────────────────────────────┐
-  │  Microservices (each with own DB/schema)         │
-  ├──────────────────────────────────────────────────┤
-  │  • auth-service      (8081) — registration, JWT  │
-  │  • order-service     (8082) — order CRUD         │
-  │  • dispatch-service  (8083) — rider assignment   │
-  │  • payment-service   (8084) — wallet, billing    │
-  │  • realtime-service  (8085) — WebSocket, GPS     │
-  │  • rider-service     (8086) — rider profiles     │
-  └──────────────────────────────────────────────────┘
-       ↓                           ↓
-  PostgreSQL (5432)           Redis (6379)
-  (per-service schemas)       (GPS cache, pub/sub)
+        ↓
+     Nginx (port 80)
+        ↓
+   API Gateway (port 8080)
+        ↓
+   ┌──────────────────────────────────────────────────┐
+   │  Microservices (each with own DB/schema)         │
+   ├──────────────────────────────────────────────────┤
+   │  • auth-service      (8081) — registration, JWT  │
+   │  • order-service     (8082) — order CRUD         │
+   │  • dispatch-service  (8083) — rider assignment   │
+   │  • payment-service   (8084) — wallet, billing    │
+   │  • realtime-service  (8085) — WebSocket, GPS     │
+   │  • rider-service     (8086) — rider profiles     │
+   │  • shopforme-service (8087) — shop assistance    │
+   └──────────────────────────────────────────────────┘
+        ↓                           ↓
+   PostgreSQL (5432)           Redis (6379)
+   (per-service schemas)       (GPS cache, pub/sub)
 ```
 
 ---
@@ -89,7 +90,23 @@ Clients (Mobile/Web)
   - `PATCH /api/riders/me/location` (rider)
   - `GET /api/riders/nearby` (admin/client)
 
-### 7. api-gateway
+### 7. shopforme-service
+- **Responsibilities**: Shop assistance service for clients who need help shopping for items; matches clients with riders, handles item verification, payment, and delivery.
+- **Database**: `runns_shopforme` (shopforme_requests, shopforme_items, shopforme_orders)
+- **Endpoints**:
+  - `POST /api/shopforme` (client: create request)
+  - `POST /api/shopforme/my` (client/rider: list my requests)
+  - `POST /api/shopforme/{id}/accept` (rider: accept request)
+  - `POST /api/shopforme/{id}/order` (client: place order with items)
+  - `POST /api/shopforme/{id}/verify` (rider: verify items)
+  - `POST /api/shopforme/{id}/pay` (client: pay for order)
+  - `POST /api/shopforme/{id}/dispatch` (rider: dispatch order)
+  - `POST /api/shopforme/{id}/deliver` (rider: deliver order)
+  - `POST /api/shopforme/{id}/cancel` (client/rider: cancel request)
+  - `GET /api/shopforme/{id}` (get request by ID)
+
+
+### 8. api-gateway
 - **Responsibilities**: Reverse proxy, routes requests to services based on path prefix
 - **Port**: 8080
 - **Routes**:
@@ -100,13 +117,14 @@ Clients (Mobile/Web)
   - `/api/realtime/*` → realtime-service
   - `/ws` → realtime-service
   - `/api/riders/*` → rider-service
+  - `/api/shopforme/*` → shopforme-service
 
 ---
 
 ## Shared Layer
 
 All services import `github.com/runns/shared`:
-- **models**: GORM models (User, Order, Payment, Dispatch, RiderProfile, ClientProfile, GPSEvent)
+- **models**: GORM models (User, Order, Payment, Dispatch, RiderProfile, ClientProfile, GPSEvent, ShopForMeRequest, ShopForMeItem, ShopForMeOrder)
 - **middleware**: JWT authentication, role guards, CORS, logging
 - **utils**: JSON response helpers, ID generators, distance calculation, DB connection helpers
 

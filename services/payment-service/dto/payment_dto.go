@@ -1,6 +1,9 @@
 package dto
 
-import "github.com/runns/shared/models"
+import (
+	"github.com/runns/shared/models"
+	"time"
+)
 
 type InitiatePaymentRequest struct {
 	OrderID uint                 `json:"order_id"`
@@ -14,6 +17,11 @@ type VerifyPaymentRequest struct {
 
 type WalletTopupRequest struct {
 	Amount float64 `json:"amount"`
+}
+
+type WalletTransferRequest struct {
+	RiderID uint    `json:"rider_id"`
+	Amount  float64 `json:"amount"`
 }
 
 type PaymentResponse struct {
@@ -30,6 +38,35 @@ type PaymentResponse struct {
 type WalletResponse struct {
 	ClientID      uint    `json:"client_id"`
 	WalletBalance float64 `json:"wallet_balance"`
+}
+
+type WalletTransferResponse struct {
+	Reference         string  `json:"reference"`
+	Amount            float64 `json:"amount"`
+	ClientNewBalance  float64 `json:"client_new_balance"`
+	RiderNewBalance   float64 `json:"rider_new_balance"`
+}
+
+type RiderWalletResponse struct {
+	RiderID        uint    `json:"rider_id"`
+	Balance        float64 `json:"balance"`
+	PendingBalance float64 `json:"pending_balance"`
+}
+
+type NINStatusResponse struct {
+	RiderID     uint       `json:"rider_id"`
+	NINVerified bool       `json:"nin_verified"`
+	NIN         string     `json:"nin,omitempty"`
+	VerifiedAt  *time.Time `json:"verified_at,omitempty"`
+}
+
+type WalletTransferEvent struct {
+	PaymentID  uint      `json:"payment_id"`
+	ClientID   uint      `json:"client_id"`
+	RiderID    uint      `json:"rider_id"`
+	Amount     float64   `json:"amount"`
+	Reference  string    `json:"reference"`
+	Timestamp  time.Time `json:"timestamp"`
 }
 
 func ToPaymentResponse(p *models.Payment) PaymentResponse {

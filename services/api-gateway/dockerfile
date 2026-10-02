@@ -12,9 +12,11 @@ ENV GOWORK=off
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOFLAGS="-mod=mod"
+ENV GOMEMLIMIT=512MiB
+ENV GOGC=50
 
 RUN go mod download
-RUN GOMAXPROCS=1 go build -p 1 -o /gateway .
+RUN GOMAXPROCS=1 go build -p 1 -ldflags="-s -w" -o /gateway .
 
-EXPOSE 8001:8001
+EXPOSE 8001
 CMD ["/gateway"]

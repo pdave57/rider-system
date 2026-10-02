@@ -1,0 +1,31 @@
+FROM golang:1.26-alpine AS builder
+
+RUN apk update && apk add --no-cache ca-certificates tzdata gcc musl-dev
+
+WORKDIR /app
+COPY shared/ shared/
+COPY services/shopforme-service/ services/shopforme-service/
+
+WORKDIR /app/services/shopforme-service
+
+ENV GOWORK=off
+ENV CGO_ENABLED=1
+ENV GOOS=linux
+ENV GOFLAGS="-mod=mod"
+ENV GOMEMLIMIT=512MiB
+ENV GOGC=50
+
+RUN go mod download
+RUN GOMAXPROCS=1 go build -p 1 -ldflags="-s -w" -o /shopforme-service .
+
+FROM alpine:3.18
+
+RUN apk add --no-cache ca-certificates
+
+WORKDIR /app
+
+COPY --from=builder /shopforme-service .
+
+EXPOSE 8088
+
+CMD ["./shopforme-service"]

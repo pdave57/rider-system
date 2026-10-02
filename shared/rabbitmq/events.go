@@ -26,6 +26,21 @@ const (
 	RoutingKeyUserRoleChanged = "user.role_changed"
 	RoutingKeyUserDeactivated = "user.deactivated"
 	RoutingKeyUserValidated  = "user.validated"
+
+	// Wallet events
+	RoutingKeyWalletTransferred = "wallet.transferred"
+	RoutingKeyWalletTopup       = "wallet.topup"
+
+	// Shop-for-Me events
+	RoutingKeyShopForMeCreated      = "shopforme.created"
+	RoutingKeyShopForMeMatched      = "shopforme.matched"
+	RoutingKeyShopForMeAccepted     = "shopforme.accepted"
+	RoutingKeyShopForMeOrderPlaced  = "shopforme.order_placed"
+	RoutingKeyShopForMeVerified     = "shopforme.verified"
+	RoutingKeyShopForMePaid         = "shopforme.paid"
+	RoutingKeyShopForMeDispatched   = "shopforme.dispatched"
+	RoutingKeyShopForMeDelivered    = "shopforme.delivered"
+	RoutingKeyShopForMeCancelled    = "shopforme.cancelled"
 )
 
 // BaseEvent is embedded in all events
@@ -176,4 +191,90 @@ type UserValidationEvent struct {
     Role          string    `json:"role"`
     IsActive      bool      `json:"is_active"`
     ValidatedAt   time.Time `json:"validated_at"`
+}
+
+// Wallet Events
+type WalletTransferredEvent struct {
+    PaymentID  uint      `json:"payment_id"`
+    ClientID   uint      `json:"client_id"`
+    RiderID    uint      `json:"rider_id"`
+    Amount     float64   `json:"amount"`
+    Reference  string    `json:"reference"`
+    Timestamp  time.Time `json:"timestamp"`
+}
+
+type WalletTopupEvent struct {
+    ClientID   uint      `json:"client_id"`
+    Amount     float64   `json:"amount"`
+    NewBalance float64   `json:"new_balance"`
+    Timestamp  time.Time `json:"timestamp"`
+}
+
+// Shop-for-Me Events
+type ShopForMeCreatedEvent struct {
+    RequestID     uint      `json:"request_id"`
+    ClientID      uint      `json:"client_id"`
+    PickupLat     float64   `json:"pickup_latitude"`
+    PickupLng     float64   `json:"pickup_longitude"`
+    DropoffLat    float64   `json:"dropoff_latitude"`
+    DropoffLng    float64   `json:"dropoff_longitude"`
+    Timestamp     time.Time `json:"timestamp"`
+}
+
+type ShopForMeMatchedEvent struct {
+    RequestID  uint      `json:"request_id"`
+    ClientID   uint      `json:"client_id"`
+    RiderID    uint      `json:"rider_id"`
+    Timestamp  time.Time `json:"timestamp"`
+}
+
+type ShopForMeAcceptedEvent struct {
+    RequestID  uint      `json:"request_id"`
+    RiderID    uint      `json:"rider_id"`
+    Timestamp  time.Time `json:"timestamp"`
+}
+
+type ShopForMeOrderPlacedEvent struct {
+    RequestID   uint      `json:"request_id"`
+    ClientID    uint      `json:"client_id"`
+    RiderID     uint      `json:"rider_id"`
+    TotalAmount float64   `json:"total_amount"`
+    ServiceFee  float64   `json:"service_fee"`
+    Timestamp   time.Time `json:"timestamp"`
+}
+
+type ShopForMeVerifiedEvent struct {
+    RequestID  uint      `json:"request_id"`
+    RiderID    uint      `json:"rider_id"`
+    Timestamp  time.Time `json:"timestamp"`
+}
+
+type ShopForMePaidEvent struct {
+    RequestID     uint      `json:"request_id"`
+    ClientID      uint      `json:"client_id"`
+    RiderID       uint      `json:"rider_id"`
+    Amount        float64   `json:"amount"`
+    WalletAmount  float64   `json:"wallet_amount"`
+    PaymentRef    string    `json:"payment_ref"`
+    Timestamp     time.Time `json:"timestamp"`
+}
+
+type ShopForMeDispatchedEvent struct {
+    RequestID  uint      `json:"request_id"`
+    RiderID    uint      `json:"rider_id"`
+    Timestamp  time.Time `json:"timestamp"`
+}
+
+type ShopForMeDeliveredEvent struct {
+    RequestID  uint      `json:"request_id"`
+    RiderID    uint      `json:"rider_id"`
+    Timestamp  time.Time `json:"timestamp"`
+}
+
+type ShopForMeCancelledEvent struct {
+    RequestID  uint      `json:"request_id"`
+    ClientID   uint      `json:"client_id"`
+    RiderID    *uint     `json:"rider_id,omitempty"`
+    Reason     string    `json:"reason"`
+    Timestamp  time.Time `json:"timestamp"`
 }

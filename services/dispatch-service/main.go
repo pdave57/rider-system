@@ -67,6 +67,28 @@ func main() {
 		if err != nil {
 			log.Printf("[dispatch-service] warning: failed to start consumer: %v", err)
 		}
+
+		// Listen to shopforme.order_placed events from shopforme-service
+		err = rmqClient.Consume("dispatch_shopforme_events_queue", "rydex_events", rabbitmq.RoutingKeyShopForMeOrderPlaced, func(body []byte) error {
+			log.Printf("[dispatch-service] Received shopforme.order_placed event: %s", string(body))
+
+			var event rabbitmq.ShopForMeOrderPlacedEvent
+			if err := json.Unmarshal(body, &event); err != nil {
+				log.Printf("[dispatch-service] Failed to unmarshal shopforme event: %v", err)
+				return err
+			}
+			if event.RequestID == 0 {
+				log.Printf("[dispatch-service] Received shopforme event with no request_id, skipping")
+				return nil
+			}
+
+			log.Printf("[dispatch-service] Shopforme request %d placed for client %d with total amount %.2f", event.RequestID, event.ClientID, event.TotalAmount)
+			// Here you could add logic to create a dispatch record for shopforme orders if needed
+			return nil
+		})
+		if err != nil {
+			log.Printf("[dispatch-service] warning: failed to start shopforme consumer: %v", err)
+		}
 	}
 
 	h := handler.NewDispatchHandler(svc)

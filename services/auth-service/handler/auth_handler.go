@@ -10,16 +10,28 @@ import (
 	"github.com/runns/shared/utils"
 )
 
-type AuthHandler struct{ svc *service.AuthService }
+type AuthHandler struct {
+	svc *service.AuthService
+}
 
-func NewAuthHandler(svc *service.AuthService) *AuthHandler { return &AuthHandler{svc: svc} }
+func NewAuthHandler(svc *service.AuthService) *AuthHandler {
+	return &AuthHandler{svc: svc}
+}
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	if !utils.AllowMethods(w, r, http.MethodPost) { return }
+	if !utils.AllowMethods(w, r, http.MethodPost) {
+		return
+	}
 	var req dto.RegisterRequest
-	if err := utils.DecodeJSON(r, &req); err != nil { utils.BadRequest(w, "invalid request body"); return }
+	if err := utils.DecodeJSON(r, &req); err != nil {
+		utils.BadRequest(w, "invalid request body")
+		return
+	}
 	resp, err := h.svc.Register(req)
-	if err != nil { utils.BadRequest(w, err.Error()); return }
+	if err != nil {
+		utils.BadRequest(w, err.Error())
+		return
+	}
 	utils.Created(w, "registration successful", resp)
 }
 

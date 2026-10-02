@@ -11,9 +11,11 @@ WORKDIR /app/services/upload-service
 ENV GOWORK=off
 ENV CGO_ENABLED=0
 ENV GOOS=linux
+ENV GOMEMLIMIT=512MiB
+ENV GOGC=50
 
 RUN go mod download
-RUN go build -o /service .
+RUN GOMAXPROCS=1 go build -p 1 -ldflags="-s -w" -o /service .
 
-EXPOSE 8087:8087
+EXPOSE 8087
 CMD ["/service"]

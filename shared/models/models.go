@@ -68,6 +68,9 @@ type RiderProfile struct {
 	VehicleType      VehicleType `gorm:"type:varchar(20)" json:"vehicle_type"`
 	VehiclePlate     string      `gorm:"type:varchar(20)" json:"vehicle_plate"`
 	LicenseNumber    string      `gorm:"type:varchar(50)" json:"license_number"`
+	NIN              string      `gorm:"type:varchar(20);uniqueIndex" json:"nin,omitempty"`
+	NINVerified      bool        `gorm:"default:false" json:"nin_verified"`
+	NINVerifiedAt    *time.Time  `json:"nin_verified_at,omitempty"`
 	IsAvailable      bool        `gorm:"default:false" json:"is_available"`
 	IsVerified       bool        `gorm:"default:false" json:"is_verified"`
 	CurrentLatitude  float64     `gorm:"type:decimal(10,8)" json:"current_latitude"`
@@ -76,6 +79,88 @@ type RiderProfile struct {
 	TotalDeliveries  int         `gorm:"default:0" json:"total_deliveries"`
 	CreatedAt        time.Time   `json:"created_at"`
 	UpdatedAt        time.Time   `json:"updated_at"`
+}
+
+type RiderWallet struct {
+	ID            uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	UserID        uint      `gorm:"uniqueIndex;not null" json:"user_id"`
+	Balance       float64   `gorm:"type:decimal(12,2);default:0.00" json:"balance"`
+	PendingBalance float64  `gorm:"type:decimal(12,2);default:0.00" json:"pending_balance"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type ShopForMeRequestStatus string
+const (
+	ShopForMePending   ShopForMeRequestStatus = "pending"
+	ShopForMeMatched   ShopForMeRequestStatus = "matched"
+	ShopForMeAccepted  ShopForMeRequestStatus = "accepted"
+	ShopForMeOrdering  ShopForMeRequestStatus = "ordering"
+	ShopForMeShopping  ShopForMeRequestStatus = "shopping"
+	ShopForMeVerifying ShopForMeRequestStatus = "verifying"
+	ShopForMePaid      ShopForMeRequestStatus = "paid"
+	ShopForMeDispatched ShopForMeRequestStatus = "dispatched"
+	ShopForMeDelivered ShopForMeRequestStatus = "delivered"
+	ShopForMeCancelled ShopForMeRequestStatus = "cancelled"
+)
+
+type ShopForMeRequest struct {
+	ID              uint                   `gorm:"primaryKey;autoIncrement" json:"id"`
+	ClientID        uint                   `gorm:"not null;index" json:"client_id"`
+	RiderID         *uint                  `gorm:"index" json:"rider_id,omitempty"`
+	Status          ShopForMeRequestStatus `gorm:"type:varchar(30);not null;default:'pending'" json:"status"`
+	PickupAddress   string                 `gorm:"type:text;not null" json:"pickup_address"`
+	PickupLatitude  float64                `gorm:"type:decimal(10,8)" json:"pickup_latitude"`
+	PickupLongitude float64                `gorm:"type:decimal(11,8)" json:"pickup_longitude"`
+	DropoffAddress  string                 `gorm:"type:text;not null" json:"dropoff_address"`
+	DropoffLatitude float64                `gorm:"type:decimal(10,8)" json:"dropoff_latitude"`
+	DropoffLongitude float64               `gorm:"type:decimal(11,8)" json:"dropoff_longitude"`
+	Notes           string                 `gorm:"type:text" json:"notes,omitempty"`
+	TotalAmount     float64                `gorm:"type:decimal(12,2);default:0.00" json:"total_amount"`
+	ServiceFee      float64                `gorm:"type:decimal(10,2);default:0.00" json:"service_fee"`
+	MatchedAt       *time.Time             `json:"matched_at,omitempty"`
+	AcceptedAt      *time.Time             `json:"accepted_at,omitempty"`
+	OrderPlacedAt   *time.Time             `json:"order_placed_at,omitempty"`
+	PaidAt          *time.Time             `json:"paid_at,omitempty"`
+	DispatchedAt    *time.Time             `json:"dispatched_at,omitempty"`
+	DeliveredAt     *time.Time             `json:"delivered_at,omitempty"`
+	CancelledAt     *time.Time             `json:"cancelled_at,omitempty"`
+	CreatedAt       time.Time              `json:"created_at"`
+	UpdatedAt       time.Time              `json:"updated_at"`
+	DeletedAt       gorm.DeletedAt         `gorm:"index" json:"-"`
+
+	Client  *User              `gorm:"foreignKey:ClientID" json:"client,omitempty"`
+	Rider   *User              `gorm:"foreignKey:RiderID" json:"rider,omitempty"`
+	Items   []ShopForMeItem    `gorm:"foreignKey:RequestID" json:"items,omitempty"`
+	Order   *ShopForMeOrder    `gorm:"foreignKey:RequestID" json:"order,omitempty"`
+}
+
+type ShopForMeItem struct {
+	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	RequestID   uint      `gorm:"not null;index" json:"request_id"`
+	Name        string    `gorm:"type:varchar(255);not null" json:"name"`
+	Description string    `gorm:"type:text" json:"description,omitempty"`
+	Quantity    int       `gorm:"default:1" json:"quantity"`
+	UnitPrice   float64   `gorm:"type:decimal(10,2);not null" json:"unit_price"`
+	TotalPrice  float64   `gorm:"type:decimal(12,2)" json:"total_price"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type ShopForMeOrder struct {
+	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	RequestID      uint      `gorm:"uniqueIndex;not null" json:"request_id"`
+	RiderID        uint      `gorm:"not null;index" json:"rider_id"`
+	ClientID       uint      `gorm:"not null;index" json:"client_id"`
+	TotalAmount    float64   `gorm:"type:decimal(12,2);not null" json:"total_amount"`
+	ServiceFee     float64   `gorm:"type:decimal(10,2);not null" json:"service_fee"`
+	WalletAmount   float64   `gorm:"type:decimal(12,2);not null" json:"wallet_amount"`
+	PaymentRef     string    `gorm:"type:varchar(100)" json:"payment_ref,omitempty"`
+	Status         string    `gorm:"type:varchar(30);not null;default:'pending'" json:"status"`
+	VerifiedAt     *time.Time `json:"verified_at,omitempty"`
+	PaidAt         *time.Time `json:"paid_at,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 type ClientProfile struct {
@@ -92,8 +177,8 @@ type ClientProfile struct {
 type Order struct {
 	ID               uint           `gorm:"primaryKey;autoIncrement" json:"id"`
 	TrackingCode     string         `gorm:"type:varchar(20);uniqueIndex;not null" json:"tracking_code"`
-	ClientID         uint           `gorm:"not null;index" json:"client_id"`
-	RiderID          *uint          `gorm:"index" json:"rider_id,omitempty"`
+	ClientID         uint           `gorm:"not null;index;constraint:Off" json:"client_id"`
+	RiderID          *uint          `gorm:"index;constraint:Off" json:"rider_id,omitempty"`
 	Status           OrderStatus    `gorm:"type:varchar(20);not null;default:'pending'" json:"status"`
 	PickupAddress    string         `gorm:"type:text;not null" json:"pickup_address"`
 	PickupLatitude   float64        `gorm:"type:decimal(10,8)" json:"pickup_latitude"`
@@ -105,7 +190,7 @@ type Order struct {
 	WeightKg         float64        `gorm:"type:decimal(6,2)" json:"weight_kg"`
 	DeliveryFee      float64        `gorm:"type:decimal(10,2)" json:"delivery_fee"`
 	Notes            string         `gorm:"type:text" json:"notes,omitempty"`
-	Items            []OrderItem    `gorm:"foreignKey:OrderID" json:"items,omitempty"`
+	Items            []OrderItem    `gorm:"foreignKey:OrderID;constraint:Off" json:"items,omitempty"`
 	PickedUpAt       *time.Time     `json:"picked_up_at,omitempty"`
 	DeliveredAt      *time.Time     `json:"delivered_at,omitempty"`
 	CancelledAt      *time.Time     `json:"cancelled_at,omitempty"`
@@ -113,9 +198,9 @@ type Order struct {
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index" json:"-"`
 
-	Client  *User    `gorm:"foreignKey:ClientID" json:"client,omitempty"`
-	Rider   *User    `gorm:"foreignKey:RiderID" json:"rider,omitempty"`
-	Payment *Payment `gorm:"foreignKey:OrderID" json:"payment,omitempty"`
+	Client  *User    `gorm:"foreignKey:ClientID;constraint:Off" json:"client,omitempty"`
+	Rider   *User    `gorm:"foreignKey:RiderID;constraint:Off" json:"rider,omitempty"`
+	Payment *Payment `gorm:"foreignKey:OrderID;constraint:Off" json:"payment,omitempty"`
 }
 type OrderItem struct {
 	ID          uint `gorm:"primaryKey;autoIncrement" json:"id"`
@@ -143,8 +228,8 @@ type Dispatch struct {
 
 type Payment struct {
 	ID            uint          `gorm:"primaryKey;autoIncrement" json:"id"`
-	OrderID       uint          `gorm:"uniqueIndex;not null" json:"order_id"`
-	ClientID      uint          `gorm:"not null;index" json:"client_id"`
+	OrderID       uint          `gorm:"uniqueIndex;not null;constraint:Off" json:"order_id"`
+	ClientID      uint          `gorm:"not null;index;constraint:Off" json:"client_id"`
 	Amount        float64       `gorm:"type:decimal(12,2);not null" json:"amount"`
 	Method        PaymentMethod `gorm:"type:varchar(20);not null" json:"method"`
 	Status        PaymentStatus `gorm:"type:varchar(20);not null;default:'pending'" json:"status"`
@@ -154,6 +239,10 @@ type Payment struct {
 	PaidAt        *time.Time    `json:"paid_at,omitempty"`
 	CreatedAt     time.Time     `json:"created_at"`
 	UpdatedAt     time.Time     `json:"updated_at"`
+}
+
+func (Payment) TableName() string {
+	return "payments"
 }
 
 type GPSEvent struct {

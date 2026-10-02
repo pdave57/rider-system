@@ -12,9 +12,11 @@ ENV GOWORK=off
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOFLAGS="-mod=mod"
+ENV GOMEMLIMIT=512MiB
+ENV GOGC=50
 
 RUN go mod download
-RUN GOMAXPROCS=1 go build -p 1 -o /service .
+RUN GOMAXPROCS=1 go build -p 1 -ldflags="-s -w" -o /service .
 
-EXPOSE 8082:8082
+EXPOSE 8082
 CMD ["/service"]
